@@ -1,0 +1,536 @@
+﻿
+using System;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.Audio;
+
+public class PlayerController1 : MonoBehaviour
+{
+    //VARIABLES DE MOVIMIENTO
+    [Header("Movimiento")]
+    public float velocidadWalk = 5f;// Velocidad normal
+    public float sprintSpeed = 8f;// Velocidad al correr
+    public float fuerzaSalto = 8f;// Fuerza del salto
+    public float tiempoSprintMaximo = 3f;// Duración maxima del sprint
+    private bool estaCayendo = false;
+
+    private float tiempoSprintRestante;//Tiempo restante de sprint
+    private bool estaSprintando = false;//Si el jugador está corriendo
+    private bool bloqueoSprint = false;// Si el sprint está bloqueado
+
+    //CONTROL DE PASOS
+    private float tiempoPasos = 0f;
+    private float intervaloCaminar = 0.4f;
+    private float intervaloCorrer = 0.3f;
+
+    //EMPUJE QUE GENERA EL ENEMIGO CUANDO ME GOLPEA
+    [Header("Empuje Enemigo")]
+    [SerializeField] public float fuerzaEmpuje = 5f;// Fuerza de empuje
+    [SerializeField] public float duracionEmpuje = 0.2f;//Cuanto dura el empuje
+    private bool siendoEmpujado = false; //Si esta en estado de empuje
+    private Vector2 direccionEmpuje;//Direccion actual del empuje
+    private float tiempoEmpuje;//Temporizador
+
+
+    //FISICA Y MOVIMIENTO
+    private Rigidbody2D rb;// Referencia al Rigidbody2D
+    private bool enSuelo = false;//Indica si está tocando el suelo
+    private bool puedeMoverse = true;//Control general del movimiento
+
+
+    //TIEMPO COYOTE (PERMITE SALTAR POCO DESPUES DE DEJAR EL SUELO)
+    [SerializeField] private float tiempoCoyoteTime = 0.1f;
+    private float tiempoCoyote = 0f;
+
+    //VIDA, MANA Y ESTADO
+    [Header("Stats")]
+    [SerializeField] private float VidaMaxima = 100f;
+    private float VidaActual;
+    [SerializeField] private int manaMaximo = 3;
+    private int manaActual = 0;
+    public bool estaVivo = true;
+
+    //DISPARO
+    [Header("Ataques")]
+    [SerializeField] private Transform controladorDisparo;
+    [SerializeField] private GameObject BolaBasica;
+    [SerializeField] private GameObject BolaUltra;
+    [SerializeField] private float tiempoEntreDisparos = 1f;
+    [SerializeField] private float distanciaMinimaDisparo = 1f; // Distancia para que no pueda disparar cerca del player
+
+    private float proximoTiempoDisparo;
+    private bool estaAtacando = false;
+
+    // Sonidos
+    [Header("Sonidos")]
+    private AudioSource audioSource;
+    [SerializeField] protected AudioClip sonidoCaminar;
+    [SerializeField] protected AudioClip sonidoCorrer;
+    [SerializeField] protected AudioClip sonidoDaño;
+    [SerializeField] protected AudioClip sonidoMuerte;
+    [SerializeField] private AudioClip sonidoDisparoBasico;
+    [SerializeField] private AudioClip sonidoDisparoUltra;
+    [SerializeField] private AudioClip sonidoSalto;
+
+
+    //REFERENCIAS
+    [Header("Referencias")]
+    private CapsuleCollider2D capsuleCollider;
+    private Animator animPlayer;
+    private SpriteRenderer spriteRenderer;
+    private bool orientacionDer = true;
+
+    [Header("UI")]
+    [SerializeField] private BarraVida barraVida;
+    [SerializeField] private BarraSprint barraSprint;
+    [SerializeField] private BarraPoder barraPoder;
+
+
+    //EVENTOS
+    public event EventHandler MuerteJugador; //Se dispara cuando el jugador muere
+
+    //START
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        capsuleCollider = GetComponent<CapsuleCollider2D>();
+        animPlayer = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        audioSource = GetComponent<AudioSource>();
+
+        tiempoSprintRestante = tiempoSprintMaximo;
+        VidaActual = VidaMaxima;
+        manaActual = 0;
+        barraPoder.ActualizarBarra(manaActual, manaMaximo);
+        proximoTiempoDisparo = Time.time;
+    }
+
+    //UPDATE — ATAQUES Y ANIMACIÓN
+    void Update()
+    {
+        if (!puedeMoverse || !estaVivo) return;
+
+        RotarControladorDisparoHaciaMouse();//Rotar el controlador de disparo hacia el mouse
+
+        //Ataque basico
+        if (Time.time >= proximoTiempoDisparo && !estaAtacando && Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            float distancia = Vector2.Distance(controladorDisparo.position, posicionMouse);
+
+            if (distancia < distanciaMinimaDisparo)
+                return;
+
+            OrientarHaciaMouse();
+
+            estaAtacando = true;
+            ReproducirSonido(sonidoDisparoBasico, 1f);
+            animPlayer.SetTrigger("AttackBasic");
+            proximoTiempoDisparo = Time.time + tiempoEntreDisparos;
+        }
+
+        //Ataque cargado, solo si el mana esta completo y no esta atacando
+        if (manaActual == manaMaximo && Input.GetKeyUp(KeyCode.Mouse1) && !estaAtacando && EstaQuieto())
+        {
+            Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            float distancia = Vector2.Distance(controladorDisparo.position, posicionMouse);
+
+            if (distancia < distanciaMinimaDisparo)
+                return;
+
+            OrientarHaciaMouse();
+
+            estaAtacando = true;
+            ReproducirSonido(sonidoDisparoUltra, 1f);
+            animPlayer.SetTrigger("AttackUltra");
+        }
+
+        // EMPUJE DEL ENEMIGO
+        if (siendoEmpujado)
+        {
+            transform.position += (Vector3)(direccionEmpuje * fuerzaEmpuje * Time.deltaTime);
+            tiempoEmpuje -= Time.deltaTime;
+
+            if (tiempoEmpuje <= 0)
+            {
+                siendoEmpujado = false;
+                puedeMoverse = true;
+            }
+        }
+
+
+        //Actualizamos parámetros para el Animator
+        ActualizarParametrosAnimator();
+    }
+
+
+    // FIXEDUPDATE — MOVIMIENTO FISICO
+    void FixedUpdate()
+    {
+        if (!puedeMoverse || !estaVivo) return;
+        if (siendoEmpujado) return;
+
+        float inputX = Input.GetAxisRaw("Horizontal");
+        bool botonSalto = Input.GetButton("Jump");
+
+        //SISTEMA DE SPRINT
+        bool presionandoSprint = Input.GetKey(KeyCode.LeftShift);
+
+        // Si esta sprintando, gasta energia
+        if (estaSprintando)
+        {
+            tiempoSprintRestante -= Time.fixedDeltaTime;
+
+            //Si se quedo sin energia, detiene y bloquea sprint
+            if (tiempoSprintRestante <= 0)
+            {
+                tiempoSprintRestante = 0;
+                estaSprintando = false;
+                bloqueoSprint = true;
+            }
+        }
+        //Si no esta sprintando y la barra no esta llena, se recarga
+        else if (tiempoSprintRestante < tiempoSprintMaximo)
+        {
+            tiempoSprintRestante += Time.fixedDeltaTime;
+
+            //Cuando se llena la barra, desbloquea el sprint
+            if (tiempoSprintRestante >= tiempoSprintMaximo)
+            {
+                tiempoSprintRestante = tiempoSprintMaximo;
+                bloqueoSprint = false;
+            }
+        }
+
+        //Solo puede comenzar a sprintar si se presiona shift, no esta bloqueado y la barra esta completa
+        if (presionandoSprint && !bloqueoSprint && tiempoSprintRestante >= tiempoSprintMaximo &&!EstaQuieto())
+        {
+            estaSprintando = true;
+        }
+        else if (!presionandoSprint)
+        {
+            estaSprintando = false;
+        }
+
+
+        //Actualizamos la barra visual
+        barraSprint.CambiarSprint(tiempoSprintRestante, tiempoSprintMaximo);
+
+        //MOVIMIENTO HORIZONTAL
+        float velocidadMovimiento = estaSprintando ? sprintSpeed : velocidadWalk;
+
+        Vector2 vel = rb.linearVelocity;
+        vel.x = inputX * velocidadMovimiento;
+
+
+        //SALTO PERSONAJE
+
+        //Salto con tiempo coyote
+        if (enSuelo)
+            tiempoCoyote = tiempoCoyoteTime;
+        else
+            tiempoCoyote -= Time.fixedDeltaTime;
+
+        if (botonSalto && tiempoCoyote > 0f)
+        {
+            vel.y = fuerzaSalto;
+            tiempoCoyote = 0f;
+            ReproducirSonido(sonidoSalto, 1f);
+        }
+
+        //APLICAR VELOCIDAD
+        rb.linearVelocity = vel;
+
+        //DETECTAR SUELO Y CAIDA
+        //Detectar si esta en el suelo
+        enSuelo = Mathf.Abs(rb.linearVelocity.y) < 0.01f;
+
+        // Detectar caida
+        estaCayendo = !enSuelo && rb.linearVelocity.y < -0.1f;
+
+        //SONIDOS DE PASOS
+        if (estaVivo && puedeMoverse && enSuelo && Mathf.Abs(inputX) > 0.1f)
+        {
+            tiempoPasos -= Time.fixedDeltaTime;
+
+            if (tiempoPasos <= 0f)
+            {
+                AudioClip clip = estaSprintando ? sonidoCorrer : sonidoCaminar;
+                float volumen = estaSprintando ? 0.8f : 0.6f;
+
+                ReproducirSonido(clip, volumen);
+                tiempoPasos = estaSprintando ? intervaloCorrer : intervaloCaminar;
+            }
+        }
+        else
+        {
+            tiempoPasos = 0f;
+        }
+        //ORIENTACION DEL SPRITE
+        //Voltear sprite segun la direccion
+        OrientacionPlayer(inputX);
+    }
+
+    //BOOLEANO QUE VERIFICA SI ESTA QUIETO EL PERSONAJE
+    private bool EstaQuieto()
+    {
+        return Mathf.Abs(rb.linearVelocity.x) < 0.01f && Mathf.Abs(rb.linearVelocity.y) < 0.01f;
+    }
+
+    //ACTUALIZAR PARAMETROS DEL ANIMATOR
+    void ActualizarParametrosAnimator()
+    {
+        //Estos valores se leen desde el Animator Controller
+        //No reproducimos animaciones manualmente
+        animPlayer.SetFloat("VelocidadX", Mathf.Abs(rb.linearVelocity.x));//Para pasar de idle a run
+        animPlayer.SetFloat("VelocidadY", rb.linearVelocity.y);
+        animPlayer.SetBool("enSuelo", enSuelo);// Controla salto/caida
+        animPlayer.SetBool("estaSprintando", estaSprintando);//Corre vs camina
+        animPlayer.SetBool("estaAtacando", estaAtacando);//El Animator controla la animacion
+        animPlayer.SetBool("estaVivo", estaVivo);// Si esta muerto, muestra anim de muerte
+        animPlayer.SetBool("estaCayendo", estaCayendo);
+
+    }
+
+    //ORIENTACION Y ROTACION DEL DISPARO
+    //se encarga de voltear al personaje cuando se mueve con las teclas (A/D o flechas).
+    void OrientacionPlayer(float input)
+    {
+        if ((orientacionDer && input < 0) || (!orientacionDer && input > 0))
+        {
+            orientacionDer = !orientacionDer;
+            Vector3 escala = transform.localScale;
+            escala.x *= -1;
+            transform.localScale = escala;
+        }
+    }
+
+    //COLISIONES
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Arrow"))
+        {
+            Arrow flecha = collision.collider.GetComponent<Arrow>();
+            if (flecha != null)
+            {
+                RecibirDaño(flecha.danio);
+               
+                RecibirGolpe(flecha.transform.position); //Aplicamos empuje
+                puedeMoverse = true;
+                Destroy(flecha.gameObject);
+            }
+        }
+        if (collision.collider.CompareTag("LanzaSpearman"))
+        {
+            RecibirDaño(15);
+            RecibirGolpe(collision.transform.position);
+            puedeMoverse = true;
+        }
+        if (collision.collider.CompareTag("EspadaSkeleton"))
+        {
+            RecibirDaño(10);
+            RecibirGolpe(collision.transform.position);
+            puedeMoverse = true;
+        }
+      
+    }
+
+    public void RecibirGolpe(Vector2 posicionEnemigo)
+    {
+        //Calcula direccion desde el enemigo hacia el jugador
+        direccionEmpuje = ((Vector2)transform.position - posicionEnemigo).normalized;
+
+        
+        if (direccionEmpuje.magnitude < 0.1f)
+        {
+            //si el player esta a la derecha de la pos del enemigo lo empuja para dicho lado
+           if (transform.position.x > posicionEnemigo.x)
+            {
+                direccionEmpuje = Vector2.right;
+            }
+            else
+            {
+                direccionEmpuje = Vector2.left;
+            }
+        }
+       
+            
+
+        //Le damos un pequeño impulso vertical para que se vea mas natural
+        direccionEmpuje.y += 0.13f;
+        direccionEmpuje.Normalize();
+
+       
+
+        tiempoEmpuje = duracionEmpuje;
+        siendoEmpujado = true;
+        puedeMoverse = false;
+    }
+
+    //Disparo basico
+    public void DisparoBola1()
+    {
+
+
+        //Convertimos la posicion del mouse en coordenadas del mundo
+        Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        //Calcula la direccion
+        Vector2 direccion = (posicionMouse - controladorDisparo.position).normalized;
+
+        //Instanciamos la bola
+        GameObject bola = Instantiate(BolaBasica, controladorDisparo.position, Quaternion.identity);
+
+        //Llamamos el scrip de la bola
+        BolaMagicaBasica bolaBasica = bola.GetComponent<BolaMagicaBasica>();
+
+        // Si existe la bola llamamos a la direccion
+        if (bolaBasica != null)
+        {
+            bolaBasica.SetDireccion(direccion);
+        }
+
+    }
+
+
+    //Disparo Ultra
+    public void DisparoBola2()
+    {
+        if (manaActual < 3) return;//Si no tiene 3 de mana no dispara
+
+
+        manaActual -= 3;
+        barraPoder.ActualizarBarra(manaActual, manaMaximo);//Actualiza la barra de mana
+
+        //Asegura que el player gire hacia donde esta el mouse
+        Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        //Calcula la direccion
+        Vector2 direccion = (posicionMouse - controladorDisparo.position).normalized;
+
+        //Instanciamos la bola
+        GameObject bola = Instantiate(BolaUltra, controladorDisparo.position, Quaternion.identity);
+
+        //Llamamos el scrip de la bola
+        BolaMagicaUltra bolaUltra = bola.GetComponent<BolaMagicaUltra>();
+
+        // Si existe la bola llamamos a la direccion
+        if (bolaUltra != null)
+        {
+            bolaUltra.SetDireccion(direccion);
+        }
+
+    }
+
+   
+
+    //Este metodo puede ser llamado desde el evento de animacion cuando termina el ataque
+    public void TerminarAtaque()
+    {
+        estaAtacando = false;// ahora puede volver a disparar después del cooldown
+    }
+
+
+    //Se encarga de voltearlo automaticamente hacia donde esta el mouse al disparar
+    void OrientarHaciaMouse()
+    {
+        Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        bool mouseADerecha = posicionMouse.x > transform.position.x;
+
+        // Si el personaje mira a la derecha y el mouse está a la izquierda (o al revés), rotamos
+        if ((orientacionDer && !mouseADerecha) || (!orientacionDer && mouseADerecha))
+        {
+            orientacionDer = !orientacionDer;
+            Vector3 escala = transform.localScale;
+            escala.x *= -1;
+            transform.localScale = escala;
+        }
+    }
+
+    //ROTA EL CONTROL DE DISPARO PARA QUE SIGA EL CURSOR DEL MOUSE EN TIEMPO REAL
+    //CUANDO SE DISPARA LA BOLA SALE A LA DIRECCI´´ON CORRECTA
+    void RotarControladorDisparoHaciaMouse()
+    {
+        // Si no hay controlador o cámara, no hacemos nada
+        if (controladorDisparo == null || Camera.main == null)
+        {
+            return;
+        }
+            
+
+        Vector3 posMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 dir = posMouse - controladorDisparo.position;
+        float angulo = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        controladorDisparo.rotation = Quaternion.Euler(0, 0, angulo);
+    }
+
+    // VIDA Y MANA
+    // RECIBIR DAÑO
+    public void RecibirDaño(float cantidad)
+    {
+        //Si ya esta muerto, ignoramos
+        if (!estaVivo) return;
+
+        //Resta Bida
+        VidaActual -= cantidad;
+        barraVida.CambiarVida(VidaActual, VidaMaxima);
+        ReproducirSonido(sonidoDaño);
+
+        //Reproduce animacion de daño
+        animPlayer.SetTrigger("Hurt");
+
+        //Si la vida es 0, muere
+        if (VidaActual <= 0)
+        {
+            Morir();
+        }
+    }
+
+    private void Morir()
+    {
+        audioSource.Stop();
+        ReproducirSonido(sonidoMuerte,1f,true);
+        estaVivo = false;
+        puedeMoverse = false;
+        rb.linearVelocity = Vector2.zero; //Detiene movimiento
+        animPlayer.SetBool("estaVivo", false);
+        animPlayer.SetTrigger("Dead");
+        
+        
+    }
+
+    public void AnimacionMuerteTerminada()
+    {
+        MuerteJugador?.Invoke(this, EventArgs.Empty);
+        Destroy(gameObject, 1f);//Se destruye 
+
+    }
+
+    public void AgregarMana(int cantidad)
+    {
+        manaActual = Mathf.Clamp(manaActual + cantidad, 0, manaMaximo);
+        barraPoder.ActualizarBarra(manaActual, manaMaximo);
+    }
+
+    public void AgregarVida(int cantidad)
+    {
+        VidaActual = Mathf.Clamp(VidaActual + cantidad, 0, VidaMaxima);
+        barraVida.CambiarVida(VidaActual, VidaMaxima);
+    }
+
+
+    //SONIDO
+
+    protected void ReproducirSonido(AudioClip clip, float volumen = 1f, bool interrumpir = false)
+    {
+        if (clip == null || audioSource == null)
+            return;
+
+        if (interrumpir)
+            audioSource.Stop();
+
+        audioSource.PlayOneShot(clip, volumen);
+
+    }
+
+}

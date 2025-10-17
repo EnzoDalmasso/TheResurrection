@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 3
+  tags:
+  - BolaMagica
+  - Enemigo
+  - Arrow
+  - BolaMagicaUltra
+  - LanzaSpearman
+  - EspadaSkeleton
+  - PuntoDeControl
+  - Caja
+  - Suelo
+  - Trampas
+  - Pared
+  - PlataformaMovil
+  - EnemyHead
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - Player
+  - Water
+  - UI
+  - Caja
+  - Enemigo
+  - Suelo
+  - Pared
+  - BolaMagica
+  - checkSuelo
+  - checkPared
+  - Mana
+  - LimiteCaja
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Fondo
+    uniqueID: 1595800197
+    locked: 0
+  - name: Floor
+    uniqueID: 1752126815
+    locked: 0
+  - name: Foreground
+    uniqueID: 2462784241
+    locked: 0
+  - name: Carteles
+    uniqueID: 1336977773
+    locked: 0
+  m_RenderingLayers:
+  - Default
+  - Layer 1
