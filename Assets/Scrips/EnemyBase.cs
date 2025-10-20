@@ -24,7 +24,7 @@ public class EnemyBase : MonoBehaviour
     protected Vector2 velocity;
 
     [Header("Gravedad Personalizada")]
-    [SerializeField] protected float gravedad = -25f;
+    [SerializeField] protected float gravedad = 9.8f;
     protected bool enSuelo = false;
     protected float velocidadVertical = 0f;
 
@@ -65,7 +65,7 @@ public class EnemyBase : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
 
         // Asegura que el Rigidbody este configurado correctamente
-        rb.gravityScale = 0f;//Iguala este valor al del Player para misma gravedad
+        rb.gravityScale = 9.8f;//Iguala este valor al del Player para misma gravedad
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         GameObject playerObj = GameObject.FindWithTag("Player");

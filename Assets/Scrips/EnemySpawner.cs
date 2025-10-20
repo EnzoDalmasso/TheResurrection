@@ -1,33 +1,49 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
 public class EnemyTriggerSpawner : MonoBehaviour
 {
     [Header("Prefabs de enemigos")]
-    public GameObject[] enemyPrefabs; //Lista de prefabs de enemigos
+    public GameObject[] enemyPrefabs;//Lista de prefabs de enemigos
 
-    [Header("Posición de spawn")]
-    public Transform puntoSpawn; //Donde aparece el enemigo
+    [Header("Posicion del spawn")]
+    public Transform puntoSpawn;//Putno spawn del enemigo
 
-    private GameObject enemigoActual; //Referencia al enemigo generado
+    [Header("Configuracion del generador")]
+    public int cantidadEnemigos = 1;//Cantidad de enemigos generar
+
+    [Header("Desplazamiento horizontal de spawn")]
+    public float rangoDesplazamientoX = 1f;//Cuanto puede variar la posición en el eje X
+
+    private bool yaSpawneo = false;//Boleano para avisar que se spawneo 1 ves
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !yaSpawneo)
         {
-            if (enemigoActual == null) //Solo genera si no hay enemigo
+            //Generamos los enemigos solo si no hay enemigos generados actualmente
+            for (int i = 0; i < cantidadEnemigos; i++)
             {
                 GenerarEnemigo();
             }
+            yaSpawneo = true;
         }
+        
     }
 
     private void GenerarEnemigo()
     {
         if (enemyPrefabs.Length == 0) return;
 
+        //Selecciona un enemigo aleatorio
         int index = Random.Range(0, enemyPrefabs.Length);
 
-        enemigoActual = Instantiate(enemyPrefabs[index], puntoSpawn.position, Quaternion.identity);
+        //Genera un desplazamiento aleatorio solo en el eje X
+        float desplazamientoX = Random.Range(-rangoDesplazamientoX, rangoDesplazamientoX);
+
+        //Nueva posicion para generar
+        Vector3 posicionDesplazada = new Vector3(puntoSpawn.position.x + desplazamientoX, puntoSpawn.position.y, puntoSpawn.position.z);
+
+        //Genera el enemigo en la nueva posicion
+        Instantiate(enemyPrefabs[index], posicionDesplazada, Quaternion.identity);
     }
 }
