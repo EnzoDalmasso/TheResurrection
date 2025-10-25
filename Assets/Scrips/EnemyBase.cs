@@ -376,6 +376,22 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
+   
+    protected virtual void OnDrawGizmosSelected()
+    {
+        if (checkSuelo != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(checkSuelo.position, checkSuelo.position + Vector3.down * distanciaSuelo);
+        }
+
+        if (checkPared != null)
+        {
+            Gizmos.color = Color.red;
+            Vector3 dir = facingRight ? Vector3.right : Vector3.left;
+            Gizmos.DrawLine(checkPared.position, checkPared.position + dir * distanciaPared);
+        }
+    }
 
 }
 

@@ -12,13 +12,17 @@ public class MenuPausa : MonoBehaviour
 
     private void Start()
     {
-        // Busca el objeto HUD en la escena
+        //Busca el objeto HUD en la escena
         canvasHUD = GameObject.Find("BarrasEnergia");
+        Debug.Log("MenuPausa activo");
+        
+    
+
     }
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.P))
+        if(Input.GetKeyDown(KeyCode.Escape))
         {
             if (juegoPausado)
             {
@@ -70,12 +74,21 @@ public class MenuPausa : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-   
+
 
     public void menuInicial(string nombreEscena)
     {
         Time.timeScale = 1f; //Restaurar tiempo por si estaba en pausa
         SceneManager.LoadScene(nombreEscena);
-        
+
     }
+
+    public void menuControles(string menuControles)
+    {
+     
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(menuControles);
+    }
+
 }

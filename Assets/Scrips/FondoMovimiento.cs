@@ -6,6 +6,7 @@ public class FondoMovimiento : MonoBehaviour
     private Vector2 offset;//Sirve para almacenar el desplazamiento del fondo
     private Material material;//Material para el sprite
     private Rigidbody2D jugadorRB;
+    private bool seguirJugador = true;
 
     private void Awake()
     {
@@ -15,7 +16,16 @@ public class FondoMovimiento : MonoBehaviour
 
     private void Update()
     {
+        if (!seguirJugador || jugadorRB == null) return;
+
         offset = (jugadorRB.linearVelocity.x * 0.1f)*velMovimiento * Time.deltaTime;// calcula el desplazamiento del offset y lo multiplica
         material.mainTextureOffset += offset; // modifica el maintexture del material
     }
+
+
+    public void DesactivarSeguimientoJugador()
+    {
+        seguirJugador = false;
+    }
+
 }

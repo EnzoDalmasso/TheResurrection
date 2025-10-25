@@ -11,7 +11,7 @@ public class SkeletonSpearman : EnemyBase
 
     // Control de pasos
     private float tiempoPasos = 0f;
-    private float intervaloCaminar = 0.2f;//Puedes ajustar segun la velocidad de patrulla
+    private float intervaloCaminar = 0.4f;//Puedes ajustar segun la velocidad de patrulla
     private float intervaloCorrer = 0.2f;//Ajustar según velocidad de persecución
 
 

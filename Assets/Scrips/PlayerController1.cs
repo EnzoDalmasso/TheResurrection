@@ -37,6 +37,16 @@ public class PlayerController1 : MonoBehaviour
     private bool enSuelo = false;//Indica si está tocando el suelo
     private bool puedeMoverse = true;//Control general del movimiento
 
+    [Header("Deteccion Paredes")]
+    [SerializeField] private LayerMask capaParedes;
+    [SerializeField] private float distanciaDeteccionPared = 0.2f;
+    private bool tocandoPared = false;
+
+    [Header("Deteccion de techo")]
+    [SerializeField] private Transform sensorTecho;
+    [SerializeField] private float distanciaSensor = 0.1f;
+    [SerializeField] private LayerMask capaTecho;
+
 
     //TIEMPO COYOTE (PERMITE SALTAR POCO DESPUES DE DEJAR EL SUELO)
     [SerializeField] private float tiempoCoyoteTime = 0.1f;
@@ -145,18 +155,7 @@ public class PlayerController1 : MonoBehaviour
             animPlayer.SetTrigger("AttackUltra");
         }
 
-        // EMPUJE DEL ENEMIGO
-        if (siendoEmpujado)
-        {
-            transform.position += (Vector3)(direccionEmpuje * fuerzaEmpuje * Time.deltaTime);
-            tiempoEmpuje -= Time.deltaTime;
-
-            if (tiempoEmpuje <= 0)
-            {
-                siendoEmpujado = false;
-                puedeMoverse = true;
-            }
-        }
+   
 
 
         //Actualizamos parámetros para el Animator
@@ -167,8 +166,16 @@ public class PlayerController1 : MonoBehaviour
     // FIXEDUPDATE — MOVIMIENTO FISICO
     void FixedUpdate()
     {
-        if (!puedeMoverse || !estaVivo) return;
-        if (siendoEmpujado) return;
+        if (!puedeMoverse || !estaVivo || siendoEmpujado) return;
+
+        DetectarPared();
+        // Si esta sprintando y choca con una pared, cancela el sprint y corta sonido
+        if (estaSprintando && tocandoPared)
+        {
+            estaSprintando = false;
+            audioSource.Stop(); // Corta cualquier sonido de pasos/correr activo
+        }
+
 
         float inputX = Input.GetAxisRaw("Horizontal");
         bool botonSalto = Input.GetButton("Jump");
@@ -219,7 +226,7 @@ public class PlayerController1 : MonoBehaviour
         //MOVIMIENTO HORIZONTAL
         float velocidadMovimiento = estaSprintando ? sprintSpeed : velocidadWalk;
 
-        Vector2 vel = rb.linearVelocity;
+        Vector2 vel = rb.linearVelocity; //usamos velocity real del Rigidbody2D
         vel.x = inputX * velocidadMovimiento;
 
 
@@ -239,7 +246,17 @@ public class PlayerController1 : MonoBehaviour
         }
 
         //APLICAR VELOCIDAD
+ 
         rb.linearVelocity = vel;
+
+        // Si toca un techo el personaje corta la subida
+        if (TocaTecho() && rb.linearVelocity.y > 0)
+        {
+            //Cortamos el ascendo del jugador y le aplicamos una fuerza hacia abajo
+            //Evitamos que se pegue en el techo
+            //Comenza a caer el inmediatamente
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -0.5f);
+        }
 
         //DETECTAR SUELO Y CAIDA
         //Detectar si esta en el suelo
@@ -249,7 +266,7 @@ public class PlayerController1 : MonoBehaviour
         estaCayendo = !enSuelo && rb.linearVelocity.y < -0.1f;
 
         //SONIDOS DE PASOS
-        if (estaVivo && puedeMoverse && enSuelo && Mathf.Abs(inputX) > 0.1f)
+        if (estaVivo && puedeMoverse && enSuelo && Mathf.Abs(rb.linearVelocity.x) > 0.1f && !tocandoPared)
         {
             tiempoPasos -= Time.fixedDeltaTime;
 
@@ -264,13 +281,21 @@ public class PlayerController1 : MonoBehaviour
         }
         else
         {
+            // Reiniciamos el temporizador si no se mueve o no está en suelo
             tiempoPasos = 0f;
         }
         //ORIENTACION DEL SPRITE
         //Voltear sprite segun la direccion
         OrientacionPlayer(inputX);
     }
-
+    private void OnDrawGizmosSelected()
+    {
+        if (sensorTecho != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(sensorTecho.position, sensorTecho.position + Vector3.up * distanciaSensor);
+        }
+    }
     //BOOLEANO QUE VERIFICA SI ESTA QUIETO EL PERSONAJE
     private bool EstaQuieto()
     {
@@ -316,7 +341,7 @@ public class PlayerController1 : MonoBehaviour
                 RecibirDaño(flecha.danio);
                
                 RecibirGolpe(flecha.transform.position); //Aplicamos empuje
-                puedeMoverse = true;
+                //puedeMoverse = true;
                 Destroy(flecha.gameObject);
             }
         }
@@ -324,47 +349,64 @@ public class PlayerController1 : MonoBehaviour
         {
             RecibirDaño(15);
             RecibirGolpe(collision.transform.position);
-            puedeMoverse = true;
+            //puedeMoverse = true;
         }
         if (collision.collider.CompareTag("EspadaSkeleton"))
         {
             RecibirDaño(10);
             RecibirGolpe(collision.transform.position);
-            puedeMoverse = true;
+            //puedeMoverse = true;
         }
       
     }
 
+    //DETECCION DE PARED
+    private void DetectarPared()
+    {
+        Vector2 direccion = orientacionDer ? Vector2.right : Vector2.left;
+        tocandoPared = Physics2D.Raycast(transform.position, direccion, distanciaDeteccionPared, capaParedes);
+    }
+
+    //DETECCION DE TECHO
+    private bool TocaTecho()
+    {
+        return Physics2D.Raycast(sensorTecho.position, Vector2.up, distanciaSensor, capaTecho);
+    }
+
+
     public void RecibirGolpe(Vector2 posicionEnemigo)
     {
+        if (!estaVivo) return;
+
         //Calcula direccion desde el enemigo hacia el jugador
         direccionEmpuje = ((Vector2)transform.position - posicionEnemigo).normalized;
 
-        
+        //Si están casi en la misma posición, decide empuje lateral
         if (direccionEmpuje.magnitude < 0.1f)
         {
-            //si el player esta a la derecha de la pos del enemigo lo empuja para dicho lado
-           if (transform.position.x > posicionEnemigo.x)
-            {
-                direccionEmpuje = Vector2.right;
-            }
-            else
-            {
-                direccionEmpuje = Vector2.left;
-            }
+            direccionEmpuje = transform.position.x > posicionEnemigo.x ? Vector2.right : Vector2.left;
         }
-       
-            
 
-        //Le damos un pequeño impulso vertical para que se vea mas natural
-        direccionEmpuje.y += 0.13f;
-        direccionEmpuje.Normalize();
+        //Le damos un pequeño impulso hacia arriba
+        direccionEmpuje.y = Mathf.Clamp(direccionEmpuje.y + 0.3f, 0.1f, 1f);
 
-       
+        // Reinicia movimiento actual y aplica fuerza física
+        rb.linearVelocity = Vector2.zero;
+        rb.AddForce(direccionEmpuje * fuerzaEmpuje, ForceMode2D.Impulse);
 
-        tiempoEmpuje = duracionEmpuje;
+        // Control de estado
         siendoEmpujado = true;
         puedeMoverse = false;
+        tiempoEmpuje = duracionEmpuje;
+
+        // Restablecer control luego del empuje
+        Invoke(nameof(FinEmpuje), duracionEmpuje);
+    }
+
+    private void FinEmpuje()
+    {
+        siendoEmpujado = false;
+        puedeMoverse = true;
     }
 
     //Disparo basico
@@ -493,10 +535,14 @@ public class PlayerController1 : MonoBehaviour
         estaVivo = false;
         puedeMoverse = false;
         rb.linearVelocity = Vector2.zero; //Detiene movimiento
+
+        FondoMovimiento fondo = FindFirstObjectByType<FondoMovimiento>();
+        if (fondo != null)
+            fondo.DesactivarSeguimientoJugador();
+
         animPlayer.SetBool("estaVivo", false);
         animPlayer.SetTrigger("Dead");
-        
-        
+
     }
 
     public void AnimacionMuerteTerminada()
@@ -532,5 +578,6 @@ public class PlayerController1 : MonoBehaviour
         audioSource.PlayOneShot(clip, volumen);
 
     }
+
 
 }
