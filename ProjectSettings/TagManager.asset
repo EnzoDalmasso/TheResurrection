@@ -35,7 +35,7 @@ TagManager:
   - Mana
   - LimiteCaja
   - Techo
-  - 
+  - Flecha
   - 
   - 
   - 
@@ -61,11 +61,11 @@ TagManager:
   - name: Floor
     uniqueID: 1752126815
     locked: 0
-  - name: Foreground
-    uniqueID: 2462784241
-    locked: 0
   - name: Carteles
     uniqueID: 1336977773
+    locked: 0
+  - name: Foreground
+    uniqueID: 2462784241
     locked: 0
   m_RenderingLayers:
   - Default

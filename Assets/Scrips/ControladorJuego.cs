@@ -1,6 +1,7 @@
+﻿using Cinemachine;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Cinemachine;
 
 public class ControladorJuego : MonoBehaviour
 {
@@ -10,11 +11,14 @@ public class ControladorJuego : MonoBehaviour
 
     [SerializeField] private GameObject[] puntosDeControl;//Puntos de control en la escena
     [SerializeField] private GameObject jugador;//Prefab del jugador
+    public GameObject[] PuntosDeControl => puntosDeControl;
 
     //Sonido checkpoint
     [SerializeField] private AudioClip checkPointSonido;
 
     private int indexPuntosControl; //Ultimo checkpoint alcanzado
+
+  
 
     private void Awake()
     {
@@ -35,10 +39,17 @@ public class ControladorJuego : MonoBehaviour
         GameObject nuevoJugador = Instantiate(jugador,puntosDeControl[indexPuntosControl].transform.position,Quaternion.identity);
 
         //Asignamos el jugador al CinemachineVirtualCamera
-        var cam = FindObjectOfType<CinemachineVirtualCamera>();
+        var cam = FindAnyObjectByType<CinemachineVirtualCamera>();
         if (cam != null)
         {
             cam.Follow = nuevoJugador.transform;
+        }
+
+        var menu = FindAnyObjectByType<JuegoMenuManager>();
+        if (menu != null)
+        {
+            PlayerController1 playerScript = nuevoJugador.GetComponent<PlayerController1>();
+            playerScript.MuerteJugador += menu.OnMuerteJugador;
         }
     }
 

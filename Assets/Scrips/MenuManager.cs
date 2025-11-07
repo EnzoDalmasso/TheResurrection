@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using TMPro;
 public class MenuManager : MonoBehaviour
 {
     [Header("Paneles del menu")]
@@ -79,7 +79,10 @@ public class MenuManager : MonoBehaviour
     public void VolverAlMenu()
     {
         if (transicion == null)
+        {
             transicion = TransicionEscenasUI.instance;
+        }
+            
 
         
 
@@ -104,18 +107,33 @@ public class MenuManager : MonoBehaviour
     //JUGAR
     public void Jugar(string nombreEscena)
     {
+        // Borrar progreso de checkpoints
+        PlayerPrefs.DeleteKey("puntosIndex");
+        PlayerPrefs.DeleteKey("sessionStarted");
+        PlayerPrefs.Save();
+
         if (transicion != null)
+        {
             transicion.DisolverSalida(nombreEscena);
+        }
         else
+        {
             UnityEngine.SceneManagement.SceneManager.LoadScene(nombreEscena);
+        }
+            
     }
 
     //SALIR
     public void SalirJuego()
     {
         if (transicion != null)
+        {
             transicion.DisolverLocal(() => { Application.Quit(); });
+        }  
         else
+        {
             Application.Quit();
+        }
+           
     }
 }

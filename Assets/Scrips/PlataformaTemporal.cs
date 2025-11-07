@@ -15,6 +15,7 @@ public class PlataformaTemporal : MonoBehaviour
 
     private Collider2D colPlataforma;
     private SpriteRenderer sprPlataforma;
+    [SerializeField] private Collider2D colisionadorInferior;
 
     private void Start()
     {
@@ -35,6 +36,12 @@ public class PlataformaTemporal : MonoBehaviour
                 // Oculta la plataforma
                 colPlataforma.enabled = false;
                 sprPlataforma.enabled = false;
+                if (colisionadorInferior != null)
+                {
+                    colisionadorInferior.enabled = false;
+                }
+                   
+
                 temporizador = tiempoInvisible;
             }
             else
@@ -42,6 +49,12 @@ public class PlataformaTemporal : MonoBehaviour
                 // Muestra la plataforma
                 colPlataforma.enabled = true;
                 sprPlataforma.enabled = true;
+
+                if (colisionadorInferior != null)
+                {
+                    colisionadorInferior.enabled = true;
+                }
+                    
                 temporizador = tiempoVisible;
             }
 

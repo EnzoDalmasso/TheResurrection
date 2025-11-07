@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3172025682166150222
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7065156722547554316}
+  m_Layer: 8
+  m_Name: CheckBorde
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7065156722547554316
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3172025682166150222}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.172, y: -0.499, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6516526647372460557}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3619769292700077595
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,6 +148,7 @@ Transform:
   - {fileID: 3169785604494569364}
   - {fileID: 895498437358539829}
   - {fileID: 5044723704486075506}
+  - {fileID: 7065156722547554316}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &2126262825191299489
@@ -188,7 +220,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1832183055
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 623776211, guid: d0620acb75efb4444bbfc1917c15fea1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -242,13 +274,15 @@ MonoBehaviour:
   radioAtaque: 0.25
   capaSuelo:
     serializedVersion: 2
-    m_Bits: 2304
+    m_Bits: 256
   checkSuelo: {fileID: 895498437358539829}
   checkPared: {fileID: 5044723704486075506}
   distanciaSuelo: 0.02
   distanciaPared: 0.02
+  checkBorde: {fileID: 7065156722547554316}
+  distanciaBorde: 0.4
   duracionAturdimientoBase: 1
-  tiempoCambioDireccion: 1
+  tiempoCambioDireccion: 3
   "da\xF1oLanza": {fileID: 3619769292700077595}
   tiempoEntreAtaques: 1
   velocidadCorrer: 0.4

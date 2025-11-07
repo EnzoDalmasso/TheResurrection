@@ -47,6 +47,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float distanciaSuelo = 0.2f;
     [SerializeField] protected float distanciaPared = 0.2f;
 
+
     //Aturdimiento
     [SerializeField] protected float duracionAturdimientoBase = 1.5f;
     protected float tiempoAturdimiento;
@@ -185,9 +186,17 @@ public class EnemyBase : MonoBehaviour
     //METODOS DE ESTADO
     protected virtual void Idle()
     {
+        //Bloquea todo movimiento
+        velocity = Vector2.zero;
+        velocidadVertical = 0f;
+        rb.linearVelocity = Vector2.zero;
+        canMove = false;
+
         // Si detecta al jugador, cambia de estado
         if (distanciaJugador <= radioDeteccion)
         {
+
+            canMove = true; // Vuelve a moverse si detecta jugador
             CambiarEstado(EnemyState.Chase);
         }
             
@@ -230,6 +239,8 @@ public class EnemyBase : MonoBehaviour
         {
             return;
         }
+
+      
 
         Vector2 dir = (player.position - transform.position).normalized;
         velocity.x = dir.x * moveSpeed * 1.5f; //Aumentamos la velocidad para que parezca que corra
@@ -274,9 +285,9 @@ public class EnemyBase : MonoBehaviour
     //  MOVIMIENTO CON RIGIDBODY2D
     protected virtual void Mover()
     {
-        if (!canMove) return;
+        if (!canMove || currentState == EnemyState.Idle) return;
 
-        // Aplicamos gravedad "manual"
+        // Aplicamos gravedad
         if (!EstaEnSuelo())
         {
             velocidadVertical += gravedad * Time.fixedDeltaTime;
@@ -329,6 +340,10 @@ public class EnemyBase : MonoBehaviour
         canMove = false;
         isAttacking = false;
         velocity.x = 0f;
+
+        rb.gravityScale = 0f;
+        rb.linearVelocity = Vector2.zero;
+        rb.constraints = RigidbodyConstraints2D.FreezeAll;
         Destroy(gameObject, 2f);
     }
 
@@ -353,6 +368,7 @@ public class EnemyBase : MonoBehaviour
         Vector2 dir = facingRight ? Vector2.right : Vector2.left;
         return Physics2D.Raycast(checkPared.position, dir, distanciaPared, capaSuelo);
     }
+
 
     protected void Girar(float direccionX)
     {
@@ -392,6 +408,6 @@ public class EnemyBase : MonoBehaviour
             Gizmos.DrawLine(checkPared.position, checkPared.position + dir * distanciaPared);
         }
     }
-
+   
 }
 

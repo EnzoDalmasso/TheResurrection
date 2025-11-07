@@ -16,7 +16,21 @@ public class Arrow : MonoBehaviour
         float angulo = Mathf.Atan2(direccion.y, direccion.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angulo);
     }
+    private void Start()
+    {
+       
+        Collider2D miCollider = GetComponent<Collider2D>();
+        GameObject[] enemigos = GameObject.FindGameObjectsWithTag("Enemigo");
 
+        foreach (GameObject enemigo in enemigos)
+        {
+            Collider2D colEnemigo = enemigo.GetComponent<Collider2D>();
+            if (colEnemigo != null && miCollider != null)
+            {
+                Physics2D.IgnoreCollision(miCollider, colEnemigo);
+            }
+        }
+    }
     void Update()
     {
         //Movimiento recto en el mundo
@@ -29,6 +43,8 @@ public class Arrow : MonoBehaviour
    
     private void OnTriggerEnter2D(Collider2D other)
     {
+      
+
         if (other.CompareTag("Player"))
         {
           

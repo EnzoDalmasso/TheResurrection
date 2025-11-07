@@ -46,11 +46,12 @@ public class ControladorSonido : MonoBehaviour
     
     public void EjecutarSonido(AudioClip sonido, float volumen)
     {
-
-        if (sonido != null)
-        {
-            audioSource.PlayOneShot(sonido, volumen);//Reproduce el sonido una vez sin interrumpir otros sonidos
-        }
+        if (sonido == null || audioSource == null)
+            return;
+        
+        
+        audioSource.PlayOneShot(sonido, volumen);//Reproduce el sonido una vez sin interrumpir otros sonidos
+        
             
     }
 

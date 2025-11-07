@@ -15,6 +15,8 @@ public class SkeletonSpearman : EnemyBase
     private float intervaloCorrer = 0.2f;//Ajustar según velocidad de persecución
 
 
+    private bool corriendo;
+
     // Sonidos
     [Header("Sonidos")]
     [SerializeField] protected AudioClip sonidoDaño;
@@ -73,6 +75,14 @@ public class SkeletonSpearman : EnemyBase
         }
     }
 
+    // PATRULLA
+    protected override void Patrullar()
+    {
+        base.Patrullar();
+        corriendo = false;
+    }
+
+
     //PERSECUCION
     protected override void Perseguir()
     {
@@ -105,6 +115,7 @@ public class SkeletonSpearman : EnemyBase
         }
         canMove = false;
         rb.linearVelocity = Vector2.zero;
+        velocity = Vector2.zero;
 
         if (Time.time >= proximoAtaque)
         {
@@ -180,4 +191,5 @@ public class SkeletonSpearman : EnemyBase
         audioSource.PlayOneShot(clip, volumen);
 
     }
+
 }

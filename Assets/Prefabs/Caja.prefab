@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -75,10 +75,10 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1752126815
-  m_SortingLayer: 2
+  m_SortingLayerID: -1832183055
+  m_SortingLayer: 4
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1661086882, guid: 29e21165cb3ae334d969d4be634eaa9e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f1ac5fd109e9a7c418e271f8bd0eca60, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -99,7 +99,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 6200000, guid: 13f38bf4121be4741a73b4329b7f24c6, type: 2}
+  m_Material: {fileID: 6200000, guid: f212d79a5a7644d4d8cd1973b454fa88, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -123,17 +123,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0015323162, y: -0.3082192}
+  m_Offset: {x: -0.000094890594, y: 0.13294245}
   m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 2}
+    border: {x: 0.015625, y: 0.015625, z: 0.015625, w: 0.015625}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.390625, y: 0.265625}
     newSize: {x: 2, y: 2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.7415929, y: 1.120528}
+  m_Size: {x: 0.39084804, y: 0.26556697}
   m_EdgeRadius: 0
 --- !u!50 &1305926050606763367
 Rigidbody2D:
@@ -147,9 +147,9 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 30
-  m_LinearDamping: 3
-  m_AngularDamping: 0.05
+  m_Mass: 2
+  m_LinearDamping: 0.2
+  m_AngularDamping: 0.1
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -160,5 +160,5 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
+  m_CollisionDetection: 1
+  m_Constraints: 4

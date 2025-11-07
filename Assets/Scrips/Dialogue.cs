@@ -19,6 +19,14 @@ public class Dialogue : MonoBehaviour
 
     void Update()
     {
+
+        if (didDialogueStart && Input.GetKeyDown(KeyCode.Escape))
+        {
+            CerrarDialogo();
+            return;
+        }
+
+
         // Solo se puede interactuar si el jugador esta dentro del rango
         if (isPlayerInRange && Input.GetButtonDown("Interactuar"))
         {
@@ -124,4 +132,16 @@ public class Dialogue : MonoBehaviour
             PresionarE.SetActive(false);
         }
     }
+
+    private void CerrarDialogo()
+    {
+        StopAllCoroutines(); // Detiene la escritura de texto
+        dialoguePanel.SetActive(false); // Oculta el panel
+        didDialogueStart = false; // Marca que terminó
+        lineIndex = 0; // Reinicia el índice
+
+        if (player != null)
+            player.enabled = true; // Reactiva el movimiento del jugador
+    }
+
 }

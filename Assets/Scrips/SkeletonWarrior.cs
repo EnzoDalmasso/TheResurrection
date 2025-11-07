@@ -102,8 +102,7 @@ public class SkeletonWarrior : EnemyBase
         velocity.x = dir.x * velocidadCorrer;
         Girar(dir.x);
 
-        corriendo = true;
-        anim.SetBool("IsRunning", true);
+       
 
         if (distanciaJugador <= radioAtaque)
         {
@@ -136,8 +135,15 @@ public class SkeletonWarrior : EnemyBase
     }
 
     //ACTIVCAR Y DESACTIAR DAÑO ESPADA
-    public void ActivarDañoEspada() => dañoEspada.SetActive(true);
-    public void DesactivarDañoEspada() => dañoEspada.SetActive(false);
+    public void ActivarDañoEspada()
+    {
+        dañoEspada.SetActive(true);
+    }
+
+    public void DesactivarDañoEspada()
+    {
+        dañoEspada.SetActive(false);
+    }
 
     //FINALIZA EL ATAQUE DEL ESQUELETO
     public void FinalizaAtaque()

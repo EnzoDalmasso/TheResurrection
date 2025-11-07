@@ -109,7 +109,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1832183055
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 1547690792, guid: 5e18df3daf0a1914cb9897f8a7ceae88, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -163,13 +163,15 @@ MonoBehaviour:
   radioAtaque: 1.2
   capaSuelo:
     serializedVersion: 2
-    m_Bits: 2304
+    m_Bits: 256
   checkSuelo: {fileID: 4122979911197410970}
   checkPared: {fileID: 6452582674506345212}
   distanciaSuelo: 0.02
   distanciaPared: 0.02
+  checkBorde: {fileID: 0}
+  distanciaBorde: 0.4
   duracionAturdimientoBase: 1
-  tiempoCambioDireccion: 2
+  tiempoCambioDireccion: 3
   prefabFlecha: {fileID: 8761132688090190697, guid: 7bcf3e4bd2331e642b87a34d46f3b7c2, type: 3}
   puntoDisparo: {fileID: 3785917438870565496}
   tiempoEntreDisparos: 1

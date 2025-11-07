@@ -41,6 +41,7 @@ public class PlayerController1 : MonoBehaviour
     [SerializeField] private LayerMask capaParedes;
     [SerializeField] private float distanciaDeteccionPared = 0.2f;
     private bool tocandoPared = false;
+    [SerializeField] private Transform sensorPared;
 
     [Header("Deteccion de techo")]
     [SerializeField] private Transform sensorTecho;
@@ -120,10 +121,14 @@ public class PlayerController1 : MonoBehaviour
     {
         if (!puedeMoverse || !estaVivo) return;
 
+        //Si esta en algun menu no puede disparar
+        if (!JuegoMenuManager.puedeDisparar)
+            return;
+
         RotarControladorDisparoHaciaMouse();//Rotar el controlador de disparo hacia el mouse
 
         //Ataque basico
-        if (Time.time >= proximoTiempoDisparo && !estaAtacando && Input.GetKeyUp(KeyCode.Mouse0))
+        if (Time.time >= proximoTiempoDisparo && !estaAtacando && Input.GetMouseButtonDown(0) && enSuelo)
         {
             Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             float distancia = Vector2.Distance(controladorDisparo.position, posicionMouse);
@@ -134,13 +139,19 @@ public class PlayerController1 : MonoBehaviour
             OrientarHaciaMouse();
 
             estaAtacando = true;
+            puedeMoverse = false; 
+            rb.linearVelocity = Vector2.zero; 
             ReproducirSonido(sonidoDisparoBasico, 1f);
+
+            if (estaSprintando)
+                estaSprintando = false;
+
             animPlayer.SetTrigger("AttackBasic");
             proximoTiempoDisparo = Time.time + tiempoEntreDisparos;
         }
 
         //Ataque cargado, solo si el mana esta completo y no esta atacando
-        if (manaActual == manaMaximo && Input.GetKeyUp(KeyCode.Mouse1) && !estaAtacando && EstaQuieto())
+        if (manaActual == manaMaximo && Input.GetMouseButtonDown(1) && !estaAtacando && enSuelo)
         {
             Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             float distancia = Vector2.Distance(controladorDisparo.position, posicionMouse);
@@ -151,6 +162,12 @@ public class PlayerController1 : MonoBehaviour
             OrientarHaciaMouse();
 
             estaAtacando = true;
+            puedeMoverse = false; 
+            rb.linearVelocity = Vector2.zero;
+
+            if (estaSprintando)
+                estaSprintando = false;
+
             ReproducirSonido(sonidoDisparoUltra, 1f);
             animPlayer.SetTrigger("AttackUltra");
         }
@@ -227,8 +244,18 @@ public class PlayerController1 : MonoBehaviour
         float velocidadMovimiento = estaSprintando ? sprintSpeed : velocidadWalk;
 
         Vector2 vel = rb.linearVelocity; //usamos velocity real del Rigidbody2D
-        vel.x = inputX * velocidadMovimiento;
 
+
+        if (Mathf.Abs(inputX) > 0.1f)
+        {
+            // Si hay input, aplicamos velocidad normalmente
+            vel.x = inputX * velocidadMovimiento;
+        }
+        else
+        {
+            // Si no hay input, desaceleramos suavemente en lugar de cortar a 0
+            vel.x = Mathf.Lerp(vel.x, 0, 5f * Time.fixedDeltaTime);
+        }
 
         //SALTO PERSONAJE
 
@@ -238,7 +265,7 @@ public class PlayerController1 : MonoBehaviour
         else
             tiempoCoyote -= Time.fixedDeltaTime;
 
-        if (botonSalto && tiempoCoyote > 0f)
+        if (botonSalto && tiempoCoyote > 0f && !TocaTecho())
         {
             vel.y = fuerzaSalto;
             tiempoCoyote = 0f;
@@ -246,13 +273,16 @@ public class PlayerController1 : MonoBehaviour
         }
 
         //APLICAR VELOCIDAD
- 
-        rb.linearVelocity = vel;
+
+        if (enSuelo)
+        {
+            rb.linearVelocity = vel;
+        }
 
         // Si toca un techo el personaje corta la subida
         if (TocaTecho() && rb.linearVelocity.y > 0)
         {
-            //Cortamos el ascendo del jugador y le aplicamos una fuerza hacia abajo
+            //Cortamos la subida del jugador y le aplicamos una fuerza hacia abajo
             //Evitamos que se pegue en el techo
             //Comenza a caer el inmediatamente
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, -0.5f);
@@ -363,8 +393,13 @@ public class PlayerController1 : MonoBehaviour
     //DETECCION DE PARED
     private void DetectarPared()
     {
+        Vector2 origen = sensorPared != null ? (Vector2)sensorPared.position : (Vector2)transform.position;
         Vector2 direccion = orientacionDer ? Vector2.right : Vector2.left;
-        tocandoPared = Physics2D.Raycast(transform.position, direccion, distanciaDeteccionPared, capaParedes);
+
+        RaycastHit2D hit = Physics2D.Raycast(origen, direccion, distanciaDeteccionPared, capaParedes);
+        tocandoPared = hit.collider != null;
+
+        Debug.DrawRay(origen, direccion * distanciaDeteccionPared, tocandoPared ? Color.red : Color.green);
     }
 
     //DETECCION DE TECHO
@@ -470,6 +505,7 @@ public class PlayerController1 : MonoBehaviour
     public void TerminarAtaque()
     {
         estaAtacando = false;// ahora puede volver a disparar después del cooldown
+        puedeMoverse = true;
     }
 
 
@@ -578,6 +614,32 @@ public class PlayerController1 : MonoBehaviour
         audioSource.PlayOneShot(clip, volumen);
 
     }
+    public void SetPuedeMoverse(bool valor)
+    {
+        puedeMoverse = valor;
+        if (!valor && rb != null)
+        {
+            rb.linearVelocity = Vector2.zero; // Para frenar completamente
+            
+        }
+            
+    }
 
+    public void ForzarIdle(bool valor)
+    {
+        if (animPlayer != null)
+        {
+            animPlayer.SetFloat("VelocidadX", 0f);
+            animPlayer.SetFloat("VelocidadY", 0f);
+            animPlayer.SetBool("enSuelo", true); // lo deja en estado de suelo
+            animPlayer.SetBool("estaSprintando", false);
+            animPlayer.SetBool("estaAtacando", false);
+        }
 
+        if (valor)
+        {
+            rb.linearVelocity = Vector2.zero; // se asegura que esté quieto
+        }
+
+    }
 }
