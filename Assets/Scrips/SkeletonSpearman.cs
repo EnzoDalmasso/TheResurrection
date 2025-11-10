@@ -15,6 +15,10 @@ public class SkeletonSpearman : EnemyBase
     private float intervaloCorrer = 0.2f;//Ajustar según velocidad de persecución
 
 
+    [Header("Defensa")]
+    [SerializeField, Range(0f, 1f)] private float probabilidadDefensa = 1f; // 25% de chance de bloquear
+    private bool enDefensa = false;
+
     private bool corriendo;
 
     // Sonidos
@@ -157,6 +161,23 @@ public class SkeletonSpearman : EnemyBase
             return;
         }
 
+
+        // Si está actualmente en defensa, no recibe daño
+        if (enDefensa)
+            return;
+
+        // Tiramos el dado de defensa
+        float chance = Random.value;
+
+
+        if (chance < probabilidadDefensa)
+        {
+
+
+            ActivarDefensa();
+            return; // No recibe daño
+        }
+
         base.RecibirDanio(cantidad);
 
         if (!estaMuerto())
@@ -192,4 +213,19 @@ public class SkeletonSpearman : EnemyBase
 
     }
 
+    private void ActivarDefensa()
+    {
+        enDefensa = true;
+
+        anim.SetTrigger("Defense_SkeletonSpearman"); // tu animación de defensa
+
+
+        // Desactiva el estado de defensa después de la animación (ejemplo: 1 segundo)
+        Invoke(nameof(DesactivarDefensa), 1f);
+    }
+
+    private void DesactivarDefensa()
+    {
+        enDefensa = false;
+    }
 }

@@ -279,13 +279,12 @@ MonoBehaviour:
   checkPared: {fileID: 5044723704486075506}
   distanciaSuelo: 0.02
   distanciaPared: 0.02
-  checkBorde: {fileID: 7065156722547554316}
-  distanciaBorde: 0.4
   duracionAturdimientoBase: 1
   tiempoCambioDireccion: 3
   "da\xF1oLanza": {fileID: 3619769292700077595}
   tiempoEntreAtaques: 1
   velocidadCorrer: 0.4
+  probabilidadDefensa: 0.5
   "sonidoDa\xF1o": {fileID: 8300000, guid: ff93f56cefbf37c48b1d9430bb4300e1, type: 3}
   sonidoCaminar: {fileID: 8300000, guid: ee401c05c15f98d41a6b0cf30c58ad39, type: 3}
   sonidoCorrer: {fileID: 8300000, guid: b60cd676af3d75e44ae3d4bcdd062447, type: 3}

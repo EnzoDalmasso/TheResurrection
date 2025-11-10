@@ -25,11 +25,13 @@ public class ActivarCinematica : MonoBehaviour
     //Obtenemos al Player
     private void ObtenerJugador()
     {
+
         player = FindAnyObjectByType<PlayerController1>()?.gameObject;
         if (player != null)
         {
             playerController = player.GetComponent<PlayerController1>();
             rb = player.GetComponent<Rigidbody2D>();
+           
         }
     }
 
@@ -37,6 +39,8 @@ public class ActivarCinematica : MonoBehaviour
     {
         if (collision.CompareTag("Player") && cinematica != null)
         {
+            
+
             //Desactivar movimiento sin desactivar el script
             if (playerController != null)
             {

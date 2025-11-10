@@ -22,6 +22,8 @@ public class ControladorJuego : MonoBehaviour
 
     private void Awake()
     {
+        
+        
         Instance = this;
 
         //Cuando se inicia por primera vez arranca del Inicio
@@ -51,6 +53,8 @@ public class ControladorJuego : MonoBehaviour
             PlayerController1 playerScript = nuevoJugador.GetComponent<PlayerController1>();
             playerScript.MuerteJugador += menu.OnMuerteJugador;
         }
+
+
     }
 
     //Este metodo llama cada punto de control

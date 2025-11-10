@@ -103,6 +103,8 @@ public class PlayerController1 : MonoBehaviour
     //START
     void Start()
     {
+
+
         rb = GetComponent<Rigidbody2D>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
         animPlayer = GetComponent<Animator>();
@@ -114,6 +116,11 @@ public class PlayerController1 : MonoBehaviour
         manaActual = 0;
         barraPoder.ActualizarBarra(manaActual, manaMaximo);
         proximoTiempoDisparo = Time.time;
+
+        animPlayer.SetBool("estaVivo", true);
+        animPlayer.ResetTrigger("Dead");
+        animPlayer.Rebind();
+        animPlayer.Update(0f);
     }
 
     //UPDATE — ATAQUES Y ANIMACIÓN
@@ -124,6 +131,7 @@ public class PlayerController1 : MonoBehaviour
         //Si esta en algun menu no puede disparar
         if (!JuegoMenuManager.puedeDisparar)
             return;
+
 
         RotarControladorDisparoHaciaMouse();//Rotar el controlador de disparo hacia el mouse
 
@@ -627,19 +635,21 @@ public class PlayerController1 : MonoBehaviour
 
     public void ForzarIdle(bool valor)
     {
-        if (animPlayer != null)
-        {
-            animPlayer.SetFloat("VelocidadX", 0f);
-            animPlayer.SetFloat("VelocidadY", 0f);
-            animPlayer.SetBool("enSuelo", true); // lo deja en estado de suelo
-            animPlayer.SetBool("estaSprintando", false);
-            animPlayer.SetBool("estaAtacando", false);
-        }
+        if (animPlayer == null) return;
 
         if (valor)
         {
-            rb.linearVelocity = Vector2.zero; // se asegura que esté quieto
+            animPlayer.SetFloat("VelocidadX", 0);
+            animPlayer.SetFloat("VelocidadY", 0);
+            animPlayer.SetBool("enSuelo", true);
+            animPlayer.SetBool("estaSprintando", false);
+            animPlayer.SetBool("estaAtacando", false);
         }
-
+        else
+        {
+            // Permite que el Update vuelva a controlar las animaciones normalmente
+            ActualizarParametrosAnimator();
+        }
+        
     }
 }

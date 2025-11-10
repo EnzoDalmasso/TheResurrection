@@ -19,7 +19,9 @@ public class SkeletonWarrior : EnemyBase
 
     private bool corriendo;
 
-  
+    [Header("Defensa")]
+    [SerializeField, Range(0f, 1f)] private float probabilidadDefensa =1f; // 25% de chance de bloquear
+    private bool enDefensa = false;
 
     // Sonidos
     [Header("Sonidos")]
@@ -161,10 +163,29 @@ public class SkeletonWarrior : EnemyBase
     // RECIBIR DAÑO
     public override void RecibirDanio(float cantidad)
     {
+     
+
         if (currentState == EnemyState.Dead || isStunned)
         {
             return;
         }
+
+        // Si está actualmente en defensa, no recibe daño
+        if (enDefensa)
+            return;
+
+        // Tiramos el dado de defensa
+        float chance = Random.value;
+        
+
+        if (chance < probabilidadDefensa)
+        {
+
+           
+            ActivarDefensa();
+            return; // No recibe daño
+        }
+
         base.RecibirDanio(cantidad);
 
         if (!estaMuerto())
@@ -199,5 +220,21 @@ public class SkeletonWarrior : EnemyBase
 
         audioSource.PlayOneShot(clip, volumen);
 
+    }
+
+    private void ActivarDefensa()
+    {
+        enDefensa = true;
+        
+        anim.SetTrigger("Defense_SkeletonWarrior"); // tu animación de defensa
+        
+
+        // Desactiva el estado de defensa después de la animación (ejemplo: 1 segundo)
+        Invoke(nameof(DesactivarDefensa), 1f);
+    }
+
+    private void DesactivarDefensa()
+    {
+        enDefensa = false;
     }
 }

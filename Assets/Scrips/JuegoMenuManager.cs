@@ -215,7 +215,19 @@ public class JuegoMenuManager : MonoBehaviour
     //REINICIAMOS NIVEL
     public void ReiniciarNivel()
     {
+        PlayerPrefs.DeleteKey("puntosIndex");
+        PlayerPrefs.DeleteKey("sessionStarted");
+        PlayerPrefs.Save();
+
         Time.timeScale = 1f;
+
+        // Elimina cualquier referencia vieja del jugador
+        PlayerController1 player = FindFirstObjectByType<PlayerController1>();
+        if (player != null)
+        {
+            player.estaVivo = true;
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
