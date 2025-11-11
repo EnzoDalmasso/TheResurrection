@@ -67,6 +67,11 @@ public class JuegoMenuManager : MonoBehaviour
 
         Time.timeScale = 1f;
         juegoPausado = false;
+
+        // Restaurar permiso de disparo al iniciar/ocultar menús para que
+        // PlayerController1.Update() siga actualizando el Animator.
+        JuegoMenuManager.puedeDisparar = true;
+
     }
 
     // PAUSA
@@ -82,9 +87,9 @@ public class JuegoMenuManager : MonoBehaviour
             canvasHUD.SetActive(false);
         }
 
-        if (musicaFondo != null)
+        if (ControladorSonido.instance != null)
         {
-            musicaFondo.Pause(); //Pausa la musica de fondo
+            ControladorSonido.instance.mutearSonido();
         }
 
         //Cambio cursor al de menu
@@ -109,9 +114,9 @@ public class JuegoMenuManager : MonoBehaviour
         {
             canvasHUD.SetActive(true);
         }
-        if (musicaFondo != null)
+        if (ControladorSonido.instance != null)
         {
-            musicaFondo.UnPause();//Reanuda la musica
+            ControladorSonido.instance.desmutearSonido();
         }
         CursorController cambioCursor = FindFirstObjectByType<CursorController>();
         if (cambioCursor != null)
@@ -220,6 +225,11 @@ public class JuegoMenuManager : MonoBehaviour
         PlayerPrefs.Save();
 
         Time.timeScale = 1f;
+
+        if (ControladorSonido.instance != null)
+        {
+            ControladorSonido.instance.desmutearSonido();
+        }
 
         // Elimina cualquier referencia vieja del jugador
         PlayerController1 player = FindFirstObjectByType<PlayerController1>();

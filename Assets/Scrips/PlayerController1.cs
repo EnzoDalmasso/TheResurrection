@@ -18,6 +18,13 @@ public class PlayerController1 : MonoBehaviour
     private bool estaSprintando = false;//Si el jugador está corriendo
     private bool bloqueoSprint = false;// Si el sprint está bloqueado
 
+    [Header("Deteccion Caja Lateral")]
+    [SerializeField] private Transform[] sensoresCaja; // izquierda y derecha
+    [SerializeField] private float distanciaSensorCaja = 0.1f;
+    [SerializeField] private LayerMask capaCaja;
+    private bool tocandoCajaLateral = false;
+
+
     //CONTROL DE PASOS
     private float tiempoPasos = 0f;
     private float intervaloCaminar = 0.4f;
@@ -37,6 +44,7 @@ public class PlayerController1 : MonoBehaviour
     private bool enSuelo = false;//Indica si está tocando el suelo
     private bool puedeMoverse = true;//Control general del movimiento
 
+
     [Header("Deteccion Paredes")]
     [SerializeField] private LayerMask capaParedes;
     [SerializeField] private float distanciaDeteccionPared = 0.2f;
@@ -44,7 +52,7 @@ public class PlayerController1 : MonoBehaviour
     [SerializeField] private Transform sensorPared;
 
     [Header("Deteccion de techo")]
-    [SerializeField] private Transform sensorTecho;
+    [SerializeField] private Transform[] sensorTecho;
     [SerializeField] private float distanciaSensor = 0.1f;
     [SerializeField] private LayerMask capaTecho;
 
@@ -96,7 +104,7 @@ public class PlayerController1 : MonoBehaviour
     [SerializeField] private BarraSprint barraSprint;
     [SerializeField] private BarraPoder barraPoder;
 
-
+    private bool yaSalto = false;
     //EVENTOS
     public event EventHandler MuerteJugador; //Se dispara cuando el jugador muere
 
@@ -194,6 +202,8 @@ public class PlayerController1 : MonoBehaviour
         if (!puedeMoverse || !estaVivo || siendoEmpujado) return;
 
         DetectarPared();
+        
+
         // Si esta sprintando y choca con una pared, cancela el sprint y corta sonido
         if (estaSprintando && tocandoPared)
         {
@@ -269,23 +279,32 @@ public class PlayerController1 : MonoBehaviour
 
         //Salto con tiempo coyote
         if (enSuelo)
+        {
             tiempoCoyote = tiempoCoyoteTime;
+            yaSalto = false;
+        }
         else
+        {
             tiempoCoyote -= Time.fixedDeltaTime;
+        }
+           
 
-        if (botonSalto && tiempoCoyote > 0f && !TocaTecho())
+        //se bloquea si esta tocando una caja lateral y se mueve
+        bool bloqueadoPorCaja = TocaCajaLateral() && (Mathf.Abs(rb.linearVelocity.x) > 0.04f || estaSprintando);
+
+        if (botonSalto && tiempoCoyote > 0f && !TocaTecho() && !bloqueadoPorCaja)
         {
             vel.y = fuerzaSalto;
             tiempoCoyote = 0f;
             ReproducirSonido(sonidoSalto, 1f);
+            rb.linearVelocity = vel; // aplicar salto
+
+            yaSalto=true;
         }
 
         //APLICAR VELOCIDAD
 
-        if (enSuelo)
-        {
-            rb.linearVelocity = vel;
-        }
+        rb.linearVelocity = new Vector2(vel.x, rb.linearVelocity.y);
 
         // Si toca un techo el personaje corta la subida
         if (TocaTecho() && rb.linearVelocity.y > 0)
@@ -331,7 +350,11 @@ public class PlayerController1 : MonoBehaviour
         if (sensorTecho != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(sensorTecho.position, sensorTecho.position + Vector3.up * distanciaSensor);
+            foreach (Transform sensor in sensorTecho)
+            {
+                if (sensor != null)
+                    Gizmos.DrawLine(sensor.position, sensor.position + Vector3.up * distanciaSensor);
+            }
         }
     }
     //BOOLEANO QUE VERIFICA SI ESTA QUIETO EL PERSONAJE
@@ -397,6 +420,36 @@ public class PlayerController1 : MonoBehaviour
         }
       
     }
+    //COLISIONES CON CAJAS
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        //Verifica si la caja esta bajo el player 
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Caja"))
+        {
+            // Si el player esta tocando una caja y tiene impulso hacia arriba, lo corta
+            if (rb.linearVelocity.y > 0f)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+            }
+        }
+    }
+
+    private bool TocaCajaLateral()
+    {
+        foreach (Transform sensor in sensoresCaja)
+        {
+            if (sensor == null) continue;
+
+            RaycastHit2D hit = Physics2D.Raycast(sensor.position, sensor.right * Mathf.Sign(sensor.localPosition.x), distanciaSensorCaja, capaCaja);
+
+            if (hit.collider != null)
+            {
+                return true; // si alguno de los sensores toca una caja
+            }
+        }
+        return false;
+    }
+
 
     //DETECCION DE PARED
     private void DetectarPared()
@@ -413,7 +466,18 @@ public class PlayerController1 : MonoBehaviour
     //DETECCION DE TECHO
     private bool TocaTecho()
     {
-        return Physics2D.Raycast(sensorTecho.position, Vector2.up, distanciaSensor, capaTecho);
+        foreach (Transform sensor in sensorTecho)
+        {
+            if (sensor == null) continue;
+
+            RaycastHit2D hit = Physics2D.Raycast(sensor.position, Vector2.up, distanciaSensor, capaTecho);
+
+            if (hit.collider != null)
+            {
+                return true; // si uno toca, ya alcanza
+            }
+        }
+        return false;
     }
 
 

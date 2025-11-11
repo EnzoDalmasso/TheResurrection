@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FondoMovimiento : MonoBehaviour
 {
@@ -10,22 +10,51 @@ public class FondoMovimiento : MonoBehaviour
 
     private void Awake()
     {
-        material = GetComponent<SpriteRenderer>().material;//Obtenemos el material
-        jugadorRB = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody2D>();
+        // Busca SpriteRenderer en este objeto o sus hijos
+        var spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            material = spriteRenderer.material;
+        }
+           
+        else
+        {
+           
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                jugadorRB = player.GetComponent<Rigidbody2D>();
+            }
+                
+            else
+            {
+                return;
+            } 
+        }
+           
     }
 
     private void Update()
     {
-        if (!seguirJugador || jugadorRB == null) return;
+        // Si el jugador murio y reaparecio, volvemos a buscarlo
+        if (jugadorRB == null)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                jugadorRB = player.GetComponent<Rigidbody2D>();
+                
+            }
+        }
 
-        offset = (jugadorRB.linearVelocity.x * 0.1f)*velMovimiento * Time.deltaTime;// calcula el desplazamiento del offset y lo multiplica
-        material.mainTextureOffset += offset; // modifica el maintexture del material
+        if (!seguirJugador || jugadorRB == null || material == null) return;
+
+        offset = (jugadorRB.linearVelocity.x * 0.1f) * velMovimiento * Time.deltaTime;
+        material.mainTextureOffset += offset;
     }
-
 
     public void DesactivarSeguimientoJugador()
     {
         seguirJugador = false;
     }
-
 }
