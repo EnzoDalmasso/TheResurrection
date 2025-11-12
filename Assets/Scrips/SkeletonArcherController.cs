@@ -33,12 +33,13 @@ public class SkeletonArcher : EnemyBase
     {
         base.FixedUpdate();
 
-        anim.SetBool("IsRunning", currentState == EnemyState.Chase);
-        anim.SetBool("IsMoving", currentState == EnemyState.Patrol);
+        bool moviendose = currentState == EnemyState.Patrol || currentState == EnemyState.Chase;
+        anim.SetBool("IsMoving", moviendose);
+
         anim.SetBool("IsDead", currentState == EnemyState.Dead);
 
         // SONIDOS DE PASOS CON INTERVALOS (solo caminar)
-        if (currentState == EnemyState.Patrol || currentState == EnemyState.Chase)
+        if (anim.GetBool("IsMoving"))
         {
             tiempoPasos -= Time.fixedDeltaTime;
 
@@ -50,7 +51,7 @@ public class SkeletonArcher : EnemyBase
         }
         else
         {
-            tiempoPasos = 0f; // Reinicia si no se esta moviendo
+            tiempoPasos = 0f;
         }
 
     }

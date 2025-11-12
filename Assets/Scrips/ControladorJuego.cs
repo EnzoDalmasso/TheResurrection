@@ -37,6 +37,13 @@ public class ControladorJuego : MonoBehaviour
         //Recuperamos el checkpoint guardado si llegamos a perder
         indexPuntosControl = PlayerPrefs.GetInt("puntosIndex", 0);
 
+        if (indexPuntosControl >= puntosDeControl.Length)
+        {
+            indexPuntosControl = 0;
+            PlayerPrefs.SetInt("puntosIndex", 0);
+            PlayerPrefs.Save();
+        }
+
         //Instanciamos al jugador en ese punto
         GameObject nuevoJugador = Instantiate(jugador,puntosDeControl[indexPuntosControl].transform.position,Quaternion.identity);
 

@@ -297,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73cb7e1f6ecc59541adf9b1e5b32e8d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.2
+  moveSpeed: 1.4
   gravedad: -25
   vidaMaxima: 40
   radioDeteccion: 1.8
@@ -313,8 +313,8 @@ MonoBehaviour:
   tiempoCambioDireccion: 3
   "da\xF1oEspada": {fileID: 320169826895013442}
   tiempoEntreAtaques: 1.5
-  velocidadCorrer: 0.7
-  probabilidadDefensa: 0.3
+  velocidadCorrer: 1.9
+  probabilidadDefensa: 0.4
   "sonidoDa\xF1o": {fileID: 8300000, guid: ff93f56cefbf37c48b1d9430bb4300e1, type: 3}
   sonidoCaminar: {fileID: 8300000, guid: ee401c05c15f98d41a6b0cf30c58ad39, type: 3}
   sonidoCorrer: {fileID: 8300000, guid: b60cd676af3d75e44ae3d4bcdd062447, type: 3}
@@ -370,7 +370,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.35
   m_Pitch: 1
   Loop: 0
   Mute: 0

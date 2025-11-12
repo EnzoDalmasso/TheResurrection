@@ -88,6 +88,7 @@ public class SkeletonWarrior : EnemyBase
     // PATRULLA
     protected override void Patrullar()
     {
+        if (enDefensa) return;
         base.Patrullar();
         corriendo = false;
     }
@@ -95,7 +96,7 @@ public class SkeletonWarrior : EnemyBase
     // PERSECUCIÓN
     protected override void Perseguir()
     {
-        if (!canMove || player == null)
+        if (enDefensa || !canMove || player == null)
         {
             return;
         }
@@ -225,10 +226,12 @@ public class SkeletonWarrior : EnemyBase
     private void ActivarDefensa()
     {
         enDefensa = true;
-        
+        canMove = false;
+        rb.linearVelocity = Vector2.zero;
+        velocity = Vector2.zero;
         anim.SetTrigger("Defense_SkeletonWarrior"); // tu animación de defensa
-        
 
+        //float duracionDefensa = 1f; // podés ajustar según la duración real de la animación
         // Desactiva el estado de defensa después de la animación (ejemplo: 1 segundo)
         Invoke(nameof(DesactivarDefensa), 1f);
     }
@@ -236,5 +239,12 @@ public class SkeletonWarrior : EnemyBase
     private void DesactivarDefensa()
     {
         enDefensa = false;
+        canMove = true;
+
+        // Volver a su estado normal si no está muerto ni aturdido
+        if (!estaMuerto() && !isStunned)
+        {
+            CambiarEstado(EnemyState.Patrol);
+        }
     }
 }

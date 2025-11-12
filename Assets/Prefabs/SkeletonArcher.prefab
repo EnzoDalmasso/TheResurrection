@@ -87,6 +87,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -108,6 +110,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1832183055
   m_SortingLayer: 4
   m_SortingOrder: 0
@@ -156,7 +159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 980606fdc3f9a9a44b2c28f0f2b632b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.2
+  moveSpeed: 1.4
   gravedad: -25
   vidaMaxima: 30
   radioDeteccion: 1.5
@@ -168,13 +171,11 @@ MonoBehaviour:
   checkPared: {fileID: 6452582674506345212}
   distanciaSuelo: 0.02
   distanciaPared: 0.02
-  checkBorde: {fileID: 0}
-  distanciaBorde: 0.4
   duracionAturdimientoBase: 1
   tiempoCambioDireccion: 3
   prefabFlecha: {fileID: 8761132688090190697, guid: 7bcf3e4bd2331e642b87a34d46f3b7c2, type: 3}
   puntoDisparo: {fileID: 3785917438870565496}
-  tiempoEntreDisparos: 1
+  tiempoEntreDisparos: 1.2
   fuerzaDisparo: 1
   "sonidoDa\xF1o": {fileID: 8300000, guid: ff93f56cefbf37c48b1d9430bb4300e1, type: 3}
   sonidoCaminar: {fileID: 8300000, guid: ee401c05c15f98d41a6b0cf30c58ad39, type: 3}
@@ -230,7 +231,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.35
   m_Pitch: 1
   Loop: 0
   Mute: 0

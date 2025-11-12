@@ -267,9 +267,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f0d83e097e74664aac6ec471689ae73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.2
+  moveSpeed: 1.4
   gravedad: -25
-  vidaMaxima: 35
+  vidaMaxima: 45
   radioDeteccion: 1.5
   radioAtaque: 0.25
   capaSuelo:
@@ -283,7 +283,7 @@ MonoBehaviour:
   tiempoCambioDireccion: 3
   "da\xF1oLanza": {fileID: 3619769292700077595}
   tiempoEntreAtaques: 1
-  velocidadCorrer: 0.4
+  velocidadCorrer: 1.6
   probabilidadDefensa: 0.5
   "sonidoDa\xF1o": {fileID: 8300000, guid: ff93f56cefbf37c48b1d9430bb4300e1, type: 3}
   sonidoCaminar: {fileID: 8300000, guid: ee401c05c15f98d41a6b0cf30c58ad39, type: 3}
