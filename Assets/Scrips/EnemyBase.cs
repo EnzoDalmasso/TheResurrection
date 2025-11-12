@@ -217,6 +217,16 @@ public class EnemyBase : MonoBehaviour
             temporizadorCambioDireccion = 0f;
         }
 
+        bool pared = HayParedAdelante();
+        bool suelo = EstaEnSuelo();
+
+        if (pared || !suelo)
+        {
+            direccionPatrulla *= -1;
+           
+        }
+
+
         if (HayParedAdelante() || !EstaEnSuelo())
         {
             direccionPatrulla *= -1;
@@ -230,7 +240,8 @@ public class EnemyBase : MonoBehaviour
         {
             CambiarEstado(EnemyState.Chase);
         }
-            
+        
+
     }
 
     protected virtual void Perseguir()
@@ -300,6 +311,8 @@ public class EnemyBase : MonoBehaviour
         // Movimiento horizontal + vertical
         Vector2 vel = new Vector2(velocity.x, velocidadVertical);
         rb.linearVelocity = vel;
+
+        
 
     }
 

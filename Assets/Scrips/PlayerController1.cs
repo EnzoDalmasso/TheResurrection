@@ -223,12 +223,13 @@ public class PlayerController1 : MonoBehaviour
         {
             tiempoSprintRestante -= Time.fixedDeltaTime;
 
-            //Si se quedo sin energia, detiene y bloquea sprint
-            if (tiempoSprintRestante <= 0)
+            if (!Input.GetKey(KeyCode.LeftShift) || tiempoSprintRestante <= 0)
             {
-                tiempoSprintRestante = 0;
-                estaSprintando = false;
-                bloqueoSprint = true;
+                if (estaSprintando)
+                {
+                    estaSprintando = false;
+                    animPlayer.SetBool("estaSprintando", false); // Forzamos el cambio en el animator
+                }
             }
         }
         //Si no esta sprintando y la barra no esta llena, se recarga
@@ -245,11 +246,11 @@ public class PlayerController1 : MonoBehaviour
         }
 
         //Solo puede comenzar a sprintar si se presiona shift, no esta bloqueado y la barra esta completa
-        if (presionandoSprint && !bloqueoSprint && tiempoSprintRestante >= tiempoSprintMaximo &&!EstaQuieto())
+        if (Input.GetKey(KeyCode.LeftShift) && !bloqueoSprint && tiempoSprintRestante > 0 && Mathf.Abs(inputX) > 0.1f)
         {
             estaSprintando = true;
         }
-        else if (!presionandoSprint)
+        else
         {
             estaSprintando = false;
         }
