@@ -656,7 +656,8 @@ MonoBehaviour:
   BolaBasica: {fileID: 34732828372479303, guid: 0905dc4d3fcec25428936ea20548185d, type: 3}
   BolaUltra: {fileID: 8550161951028133182, guid: bd9cc0e29d3fd8b42899e6680b9eddb8, type: 3}
   tiempoEntreDisparos: 0.5
-  distanciaMinimaDisparo: 0.15
+  distanciaMinimaDisparo: 0.34
+  offsetDistanciaMinima: {x: 0, y: -0.24}
   sonidoCaminar: {fileID: 8300000, guid: 9113a72bac44db443bb8eb7f5068188b, type: 3}
   sonidoCorrer: {fileID: 8300000, guid: 6b390d9cecde2154e8e6d7767e0295c6, type: 3}
   "sonidoDa\xF1o": {fileID: 8300000, guid: 304abe4b639d7a7409f6e527c4aa32f0, type: 3}

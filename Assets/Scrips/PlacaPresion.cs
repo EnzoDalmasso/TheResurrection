@@ -51,7 +51,7 @@ public class PlacaPresion : MonoBehaviour
     //Detecta si la "Caja" no es presionada
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Caja"))
+        if (other.CompareTag("Caja") )
         {
             if (botonPresionadoSonido != null)
                 ControladorSonido.instance.EjecutarSonido(botonPresionadoSonido, 1f);

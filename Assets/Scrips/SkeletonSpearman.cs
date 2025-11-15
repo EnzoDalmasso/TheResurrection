@@ -16,7 +16,7 @@ public class SkeletonSpearman : EnemyBase
 
 
     [Header("Defensa")]
-    [SerializeField, Range(0f, 1f)] private float probabilidadDefensa = 1f; // 25% de chance de bloquear
+    [SerializeField, Range(0f, 1f)] private float probabilidadDefensa = 1f; //Chance de bloquear
     private bool enDefensa = false;
 
     private bool corriendo;
@@ -41,8 +41,14 @@ public class SkeletonSpearman : EnemyBase
     {
         base.FixedUpdate();
 
-        anim.SetBool("IsRunning", currentState == EnemyState.Chase);
-        anim.SetBool("IsMoving", currentState == EnemyState.Patrol);
+        float velocidadHorizontal = Mathf.Abs(rb.linearVelocity.x);
+
+        //Se considera corriendo si esta persiguiendo
+        anim.SetBool("IsRunning", currentState == EnemyState.Chase && velocidadHorizontal > 0.1f);
+
+        //Se considera caminando solo si esta patrullando
+        anim.SetBool("IsMoving", currentState == EnemyState.Patrol && velocidadHorizontal > 0.1f);
+
         anim.SetBool("IsDead", currentState == EnemyState.Dead);
 
 
@@ -79,35 +85,55 @@ public class SkeletonSpearman : EnemyBase
         }
     }
 
+    protected override void Mover()
+    {
+        if (!canMove || currentState == EnemyState.Idle) return;
+
+        // Usa la velocidad que vos definas (por patrulla o persecución)
+        rb.linearVelocity = new Vector2(velocity.x, rb.linearVelocityY);
+    }
+
     // PATRULLA
     protected override void Patrullar()
     {
-        base.Patrullar();
-        corriendo = false;
+        if (!canMove || enDefensa) return;
+
+        // Movimiento de patrulla: usa la dirección actual con moveSpeed
+        velocity.x = dirX * moveSpeed;
+
+        // Si el jugador esta cerca, empieza a perseguir
+        if (player != null && distanciaJugador <= radioDeteccion * 1.2f)
+        {
+            CambiarEstado(EnemyState.Chase);
+        }
     }
 
 
     //PERSECUCION
     protected override void Perseguir()
     {
-        if (!canMove || player == null)
+        if (enDefensa || !canMove || player == null)
         {
             return;
         }
         Vector2 dir = (player.position - transform.position).normalized;
         velocity.x = dir.x * velocidadCorrer;
-        Girar(dir.x);
+        if ((dir.x > 0 && !facingRight) || (dir.x < 0 && facingRight))
+        {
+            Girar();
+        }
 
-        if (distanciaJugador <= radioAtaque)
+        //Cambia a ataque solo cuando esta cerca
+        if (distanciaJugador <= radioAtaque * 1.2f)
         {
             CambiarEstado(EnemyState.Attack);
         }
-            
-        else if (distanciaJugador > radioDeteccion * 1.5f)
+        //Sigue persiguiendo aunque se aleje un poco
+        else if (distanciaJugador > radioDeteccion * 2f)
         {
             CambiarEstado(EnemyState.Patrol);
         }
-            
+
     }
 
     //ATAQUE
@@ -166,18 +192,32 @@ public class SkeletonSpearman : EnemyBase
         if (enDefensa)
             return;
 
-        // Tiramos el dado de defensa
-        float chance = Random.value;
+        //Comprueba si el jugador esta frente al player
+        bool jugadorEnFrente = (facingRight && player.position.x > transform.position.x) || (!facingRight && player.position.x < transform.position.x);
 
+        // Si el jugador está detrás, no puede defenderse
+        if (!jugadorEnFrente)
+        {
+            base.RecibirDanio(cantidad);
+
+            if (!estaMuerto())
+            {
+                anim.SetTrigger("recibeDanioSpearman");
+                ReproducirSonido(sonidoDaño, 0.9f);
+            }
+            return;
+        }
+
+        // Tiramos el dado de defensa (solo si está de frente)
+        float chance = Random.value;
 
         if (chance < probabilidadDefensa)
         {
-
-
             ActivarDefensa();
-            return; // No recibe daño
+            return; // Bloquea el golpe
         }
 
+        // Si no se defendió, recibe daño normalmente
         base.RecibirDanio(cantidad);
 
         if (!estaMuerto())
@@ -185,9 +225,9 @@ public class SkeletonSpearman : EnemyBase
             anim.SetTrigger("recibeDanioSpearman");
             ReproducirSonido(sonidoDaño, 0.9f);
         }
-        
-       
+
     }
+
 
     protected override void Muerte()
     {
@@ -216,16 +256,34 @@ public class SkeletonSpearman : EnemyBase
     private void ActivarDefensa()
     {
         enDefensa = true;
+        canMove = false;
+        rb.linearVelocity = Vector2.zero;
+        velocity = Vector2.zero;
+       
+        anim.SetTrigger("Defense_SkeletonSpearman"); // tu animacion de defensa
 
-        anim.SetTrigger("Defense_SkeletonSpearman"); // tu animación de defensa
 
-
-        // Desactiva el estado de defensa después de la animación (ejemplo: 1 segundo)
+        //Desactiva el estado de defensa despues de la animacion
         Invoke(nameof(DesactivarDefensa), 1f);
     }
 
     private void DesactivarDefensa()
     {
         enDefensa = false;
+        canMove = true;
+
+
+        if (estaMuerto() || isStunned)
+            return;
+
+        //Si el jugador todavia esta cerca, vuelve a perseguir
+        if (player != null && distanciaJugador <= radioDeteccion * 1.2f)
+        {
+            CambiarEstado(EnemyState.Chase);
+        }
+        else
+        {
+            CambiarEstado(EnemyState.Patrol);
+        }
     }
 }

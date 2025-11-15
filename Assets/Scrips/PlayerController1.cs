@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Text.RegularExpressions;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -22,12 +23,11 @@ public class PlayerController1 : MonoBehaviour
     [SerializeField] private Transform[] sensoresCaja; // izquierda y derecha
     [SerializeField] private float distanciaSensorCaja = 0.1f;
     [SerializeField] private LayerMask capaCaja;
-    private bool tocandoCajaLateral = false;
 
 
     //CONTROL DE PASOS
     private float tiempoPasos = 0f;
-    private float intervaloCaminar = 0.4f;
+    private float intervaloCaminar = 0.5f;
     private float intervaloCorrer = 0.3f;
 
     //EMPUJE QUE GENERA EL ENEMIGO CUANDO ME GOLPEA
@@ -76,6 +76,7 @@ public class PlayerController1 : MonoBehaviour
     [SerializeField] private GameObject BolaUltra;
     [SerializeField] private float tiempoEntreDisparos = 1f;
     [SerializeField] private float distanciaMinimaDisparo = 1f; // Distancia para que no pueda disparar cerca del player
+    [SerializeField] private Vector2 offsetDistanciaMinima = Vector2.zero;
 
     private float proximoTiempoDisparo;
     private bool estaAtacando = false;
@@ -146,10 +147,15 @@ public class PlayerController1 : MonoBehaviour
         //Ataque basico
         if (Time.time >= proximoTiempoDisparo && !estaAtacando && Input.GetMouseButtonDown(0) && enSuelo)
         {
-            Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            float distancia = Vector2.Distance(controladorDisparo.position, posicionMouse);
+            Vector2 puntoMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            if (distancia < distanciaMinimaDisparo)
+            // CANCELA SI EL MOUSE ESTÁ DENTRO DEL COLLIDER DEL PLAYER
+            if (capsuleCollider.OverlapPoint(puntoMouse))
+                return;
+
+            Vector2 centroZonaBloqueo = (Vector2)transform.position + offsetDistanciaMinima;
+
+            if (Vector2.Distance(centroZonaBloqueo, puntoMouse) < distanciaMinimaDisparo)
                 return;
 
             OrientarHaciaMouse();
@@ -172,9 +178,14 @@ public class PlayerController1 : MonoBehaviour
             Vector3 posicionMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             float distancia = Vector2.Distance(controladorDisparo.position, posicionMouse);
 
-            if (distancia < distanciaMinimaDisparo)
+            Vector2 puntoMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            if (capsuleCollider.OverlapPoint(puntoMouse))
                 return;
 
+            Vector2 centroZonaBloqueo = (Vector2)transform.position + offsetDistanciaMinima;
+
+            if (Vector2.Distance(centroZonaBloqueo, puntoMouse) < distanciaMinimaDisparo)
+                return;
             OrientarHaciaMouse();
 
             estaAtacando = true;
@@ -218,44 +229,60 @@ public class PlayerController1 : MonoBehaviour
         //SISTEMA DE SPRINT
         bool presionandoSprint = Input.GetKey(KeyCode.LeftShift);
 
-        // Si esta sprintando, gasta energia
+        // Si esta sprintando actualmente
         if (estaSprintando)
         {
             tiempoSprintRestante -= Time.fixedDeltaTime;
 
-            if (!Input.GetKey(KeyCode.LeftShift) || tiempoSprintRestante <= 0)
+            //Si se suelta Shift o se acaba el tiempo
+            if (!presionandoSprint || tiempoSprintRestante <= 0)
             {
-                if (estaSprintando)
+                estaSprintando = false;
+                animPlayer.SetBool("estaSprintando", false);
+
+                if (tiempoSprintRestante <= 0)
                 {
-                    estaSprintando = false;
-                    animPlayer.SetBool("estaSprintando", false); // Forzamos el cambio en el animator
+                    tiempoSprintRestante = 0;
+                    bloqueoSprint = true; //Se bloquea hasta llenarse completamente
                 }
             }
         }
-        //Si no esta sprintando y la barra no esta llena, se recarga
-        else if (tiempoSprintRestante < tiempoSprintMaximo)
-        {
-            tiempoSprintRestante += Time.fixedDeltaTime;
-
-            //Cuando se llena la barra, desbloquea el sprint
-            if (tiempoSprintRestante >= tiempoSprintMaximo)
-            {
-                tiempoSprintRestante = tiempoSprintMaximo;
-                bloqueoSprint = false;
-            }
-        }
-
-        //Solo puede comenzar a sprintar si se presiona shift, no esta bloqueado y la barra esta completa
-        if (Input.GetKey(KeyCode.LeftShift) && !bloqueoSprint && tiempoSprintRestante > 0 && Mathf.Abs(inputX) > 0.1f)
-        {
-            estaSprintando = true;
-        }
+        //Si no esta sprintando
         else
         {
-            estaSprintando = false;
+            //Si esta bloqueado, solo recarga hasta llenarse
+            if (bloqueoSprint)
+            {
+                //Ahora recarga igual aunque mantenga Shift
+                if (tiempoSprintRestante < tiempoSprintMaximo)
+                {
+                    tiempoSprintRestante += Time.fixedDeltaTime;
+
+                    //Cuando se llena completamente, se desbloquea
+                    if (tiempoSprintRestante >= tiempoSprintMaximo)
+                    {
+                        tiempoSprintRestante = tiempoSprintMaximo;
+                        bloqueoSprint = false;
+                    }
+                }
+            }
+            //Si no esta bloqueado, recarga normalmente mientras no presione Shift
+            else if (!presionandoSprint && tiempoSprintRestante < tiempoSprintMaximo)
+            {
+                tiempoSprintRestante += Time.fixedDeltaTime;
+                if (tiempoSprintRestante > tiempoSprintMaximo)
+                {
+                    tiempoSprintRestante = tiempoSprintMaximo;
+                }
+                   
+            }
+
+            //Solo permite sprintar cuando la barra esta completamente cargada
+            if (presionandoSprint && !bloqueoSprint && tiempoSprintRestante >= tiempoSprintMaximo && Mathf.Abs(inputX) > 0.1f)
+            {
+                estaSprintando = true;
+            }
         }
-
-
         //Actualizamos la barra visual
         barraSprint.CambiarSprint(tiempoSprintRestante, tiempoSprintMaximo);
 
@@ -346,17 +373,24 @@ public class PlayerController1 : MonoBehaviour
         //Voltear sprite segun la direccion
         OrientacionPlayer(inputX);
     }
+   
     private void OnDrawGizmosSelected()
     {
-        if (sensorTecho != null)
-        {
+        if (capsuleCollider != null)
+        { // Si no hay collider todavía, igual dibujamos
             Gizmos.color = Color.red;
-            foreach (Transform sensor in sensorTecho)
-            {
-                if (sensor != null)
-                    Gizmos.DrawLine(sensor.position, sensor.position + Vector3.up * distanciaSensor);
-            }
+
+            // USAR EL OFFSET EN EL DIBUJO
+            Vector2 centroZonaBloqueo = (Application.isPlaying)
+                ? (Vector2)transform.position + offsetDistanciaMinima
+                : (Vector2)transform.position + offsetDistanciaMinima;
+
+            Gizmos.DrawWireSphere(centroZonaBloqueo, distanciaMinimaDisparo);
         }
+
+        // COLOR 2: Radio mínimo de disparo
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, distanciaMinimaDisparo);
     }
     //BOOLEANO QUE VERIFICA SI ESTA QUIETO EL PERSONAJE
     private bool EstaQuieto()
@@ -516,6 +550,7 @@ public class PlayerController1 : MonoBehaviour
         siendoEmpujado = false;
         puedeMoverse = true;
     }
+
 
     //Disparo basico
     public void DisparoBola1()

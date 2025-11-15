@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Bson;
+using System;
 using UnityEngine;
 
 public enum EnemyState
@@ -17,11 +18,14 @@ public class EnemyBase : MonoBehaviour
     protected Transform player;
     protected AudioSource audioSource;
     protected Rigidbody2D rb;
-
+    protected CapsuleCollider2D col;
+    
     //Movimiento fisico
     [SerializeField] protected float moveSpeed = 2f;
     protected bool facingRight = true;
     protected Vector2 velocity;
+    protected float dirX = 1;
+   
 
     [Header("Gravedad Personalizada")]
     [SerializeField] protected float gravedad = 9.8f;
@@ -41,11 +45,8 @@ public class EnemyBase : MonoBehaviour
     //Deteccion
     [SerializeField] protected float radioDeteccion = 6f;
     [SerializeField] protected float radioAtaque = 1.5f;
-    [SerializeField] protected LayerMask capaSuelo;
-    [SerializeField] protected Transform checkSuelo;
-    [SerializeField] protected Transform checkPared;
-    [SerializeField] protected float distanciaSuelo = 0.2f;
-    [SerializeField] protected float distanciaPared = 0.2f;
+    [SerializeField] LayerMask Suelo;
+    [SerializeField] private LayerMask Pared;
 
 
     //Aturdimiento
@@ -64,7 +65,7 @@ public class EnemyBase : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         rb = GetComponent<Rigidbody2D>();
-
+        col=GetComponent<CapsuleCollider2D>();
         // Asegura que el Rigidbody este configurado correctamente
         rb.gravityScale = 9.8f;//Iguala este valor al del Player para misma gravedad
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -81,7 +82,10 @@ public class EnemyBase : MonoBehaviour
             }
                 
         }
-      
+
+        if (player != null)
+            distanciaJugador = Vector2.Distance(transform.position, player.position);
+
         vidaActual = vidaMaxima;
         CambiarEstado(EnemyState.Patrol);
     }
@@ -96,10 +100,21 @@ public class EnemyBase : MonoBehaviour
             return;
         }
 
-        if (player)
+        // Primero chequea el suelo
+        CheckSuelo();
+
+        if (player != null)
         {
             distanciaJugador = Vector2.Distance(transform.position, player.position);
         }
+
+        // Solo hacer detecciones si está en suelo
+        if (enSuelo)
+        {
+            Detecciones();
+        }
+        
+
            
 
         switch (currentState)
@@ -167,6 +182,25 @@ public class EnemyBase : MonoBehaviour
 
     }
 
+    protected virtual void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Enemigo") )
+        {
+            //Cambia de direccion
+            Girar();
+
+            //Reinicia el temporizador del patrol para evitar bucles
+            temporizadorCambioDireccion = 0f;
+        }
+
+        // Si choca con una puerta gira
+        if (collision.collider.name == "Puerta")
+        {
+            Girar();
+            temporizadorCambioDireccion = 0f;
+        }
+    }
+
     protected virtual void OnDestroy()
     {
         GameObject playerObj = GameObject.FindWithTag("Player");
@@ -216,25 +250,7 @@ public class EnemyBase : MonoBehaviour
             direccionPatrulla *= -1;
             temporizadorCambioDireccion = 0f;
         }
-
-        bool pared = HayParedAdelante();
-        bool suelo = EstaEnSuelo();
-
-        if (pared || !suelo)
-        {
-            direccionPatrulla *= -1;
-           
-        }
-
-
-        if (HayParedAdelante() || !EstaEnSuelo())
-        {
-            direccionPatrulla *= -1;
-        }
-           
-        velocity.x = direccionPatrulla * moveSpeed;
-        Girar(velocity.x);
-
+  
         //Si el jugador esta cerca lo persigue
         if (distanciaJugador <= radioDeteccion)
         {
@@ -251,11 +267,11 @@ public class EnemyBase : MonoBehaviour
             return;
         }
 
-      
 
+        
         Vector2 dir = (player.position - transform.position).normalized;
         velocity.x = dir.x * moveSpeed * 1.5f; //Aumentamos la velocidad para que parezca que corra
-        Girar(dir.x);
+        Girar();
 
         if (distanciaJugador <= radioAtaque)
         {
@@ -298,21 +314,8 @@ public class EnemyBase : MonoBehaviour
     {
         if (!canMove || currentState == EnemyState.Idle) return;
 
-        // Aplicamos gravedad
-        if (!EstaEnSuelo())
-        {
-            velocidadVertical += gravedad * Time.fixedDeltaTime;
-        }
-        else if (velocidadVertical < 0f)
-        {
-            velocidadVertical = 0f; // Detiene caida al tocar suelo
-        }
-
-        // Movimiento horizontal + vertical
-        Vector2 vel = new Vector2(velocity.x, velocidadVertical);
-        rb.linearVelocity = vel;
-
-        
+        rb.linearVelocity = new Vector2(dirX * moveSpeed, rb.linearVelocityY);
+  
 
     }
 
@@ -369,58 +372,67 @@ public class EnemyBase : MonoBehaviour
         currentState = nuevo;
     }
 
-    protected bool EstaEnSuelo()
+
+    private void CheckSuelo()
     {
-        RaycastHit2D hit = Physics2D.Raycast(checkSuelo.position, Vector2.down, distanciaSuelo, capaSuelo);
-        enSuelo = hit.collider != null;
-        return enSuelo;
+        //Utilizamos el centro del collider, no la del transform
+        Vector2 centroCol = (Vector2)col.bounds.center;
+
+        //Calculamos los puntos izquierda y derecha del collider
+        Vector2 sueloIz = new Vector2(centroCol.x - (col.bounds.extents.x * 0.9f), centroCol.y - col.bounds.extents.y);
+        Vector2 sueloDer = new Vector2(centroCol.x + (col.bounds.extents.x * 0.9f), centroCol.y - col.bounds.extents.y);
+
+        //Raycast
+        float distanciaRayo = 0.03f;
+        RaycastHit2D rayoSueloIzq = Physics2D.Raycast(sueloIz, Vector2.down, distanciaRayo, Suelo);
+        RaycastHit2D rayoSueloDer = Physics2D.Raycast(sueloDer, Vector2.down, distanciaRayo, Suelo);
+
+        // Debug
+        Debug.DrawRay(sueloIz, Vector2.down * distanciaRayo, Color.cyan);
+        Debug.DrawRay(sueloDer, Vector2.down * distanciaRayo, Color.cyan);
+
+        enSuelo = (rayoSueloIzq || rayoSueloDer);
     }
 
-    protected bool HayParedAdelante()
+
+    protected virtual void Girar()
     {
-        Vector2 dir = facingRight ? Vector2.right : Vector2.left;
-        return Physics2D.Raycast(checkPared.position, dir, distanciaPared, capaSuelo);
+        rb.linearVelocity = Vector2.zero;
+        facingRight = !facingRight;//Actualiza la direccion real
+        transform.localScale = new Vector2(transform.localScale.x*-1,transform.localScale.y);
+        dirX *= -1;
     }
 
-
-    protected void Girar(float direccionX)
+    private void Detecciones()
     {
-        if (direccionX > 0 && !facingRight)
+
+        Vector2 centroCol = (Vector2)col.bounds.center;
+        Vector2 posRayoDebajo = new Vector2(centroCol.x + (col.bounds.extents.x * dirX),centroCol.y - col.bounds.extents.y);
+
+        float distanciaRayoX = 0.05f;
+       
+        RaycastHit2D rayoDebajo = Physics2D.Raycast(posRayoDebajo, Vector2.down, distanciaRayoX, Suelo);
+        Debug.DrawRay(posRayoDebajo, Vector2.down * distanciaRayoX, Color.red);
+
+        if (!rayoDebajo)
         {
-            if(EstaEnSuelo())
-            {
-                facingRight = true;
-                transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-            }
-           
+            Girar();
+            return;
         }
-        else if (direccionX < 0 && facingRight)
+
+
+        //Raycast hacia adelante (para detectar paredes)
+        Vector2 posRayoFrente = new Vector2(centroCol.x + (col.bounds.extents.x * dirX),centroCol.y);
+
+        float distanciaRayoFrente = 0.05f;
+        RaycastHit2D rayoFrente = Physics2D.Raycast(posRayoFrente, Vector2.right * dirX, distanciaRayoFrente, Pared);
+        Debug.DrawRay(posRayoFrente, Vector2.right * dirX * distanciaRayoFrente, Color.red);
+
+        // Si hay pared adelante gira
+        if (rayoFrente)
         {
-            if(EstaEnSuelo())
-            {
-                facingRight = false;
-                transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-            }
-         
+            Girar();
         }
     }
-
-   
-    protected virtual void OnDrawGizmosSelected()
-    {
-        if (checkSuelo != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(checkSuelo.position, checkSuelo.position + Vector3.down * distanciaSuelo);
-        }
-
-        if (checkPared != null)
-        {
-            Gizmos.color = Color.red;
-            Vector3 dir = facingRight ? Vector3.right : Vector3.left;
-            Gizmos.DrawLine(checkPared.position, checkPared.position + dir * distanciaPared);
-        }
-    }
-   
 }
 

@@ -34,7 +34,10 @@ public class BolaMagicaBasica : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-
+        if (collision.CompareTag("PlacaPuerta"))
+        {
+            Destroy(gameObject);
+        }
         if (collision.gameObject.layer == LayerMask.NameToLayer("Suelo") || collision.gameObject.layer == LayerMask.NameToLayer("Pared") || collision.gameObject.layer == LayerMask.NameToLayer("Techo") || collision.gameObject.layer == LayerMask.NameToLayer("Caja"))//Si colisiona con el suelo se destruye
         {
 

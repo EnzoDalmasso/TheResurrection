@@ -18,6 +18,8 @@ TagManager:
   - PlataformaMovil
   - EnemyHead
   - EnemyHeadArcher
+  - PlacaPuerta
+  - 'Puerta '
   layers:
   - Default
   - TransparentFX
@@ -36,7 +38,7 @@ TagManager:
   - LimiteCaja
   - Techo
   - Flecha
-  - 
+  - capaPared
   - 
   - 
   - 

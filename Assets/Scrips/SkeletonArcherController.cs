@@ -9,10 +9,11 @@ public class SkeletonArcher : EnemyBase
     [SerializeField] private float tiempoEntreDisparos = 1.5f;
     private float proximoDisparo;
     [SerializeField] private float fuerzaDisparo = 10f;
+    protected bool mirandoAlJugador = false;
 
     // Control de pasos
     private float tiempoPasos = 0f;
-    private float intervaloCaminar = 0.3f; // Ajusta segun la animacion
+    private float intervaloCaminar = 0.3f; //Ajusta el sonido segun la animacion
 
 
     // Sonidos
@@ -33,7 +34,7 @@ public class SkeletonArcher : EnemyBase
     {
         base.FixedUpdate();
 
-        bool moviendose = currentState == EnemyState.Patrol || currentState == EnemyState.Chase;
+        bool moviendose = (currentState == EnemyState.Patrol || currentState == EnemyState.Chase) && Mathf.Abs(rb.linearVelocity.x) > 0.1f;
         anim.SetBool("IsMoving", moviendose);
 
         anim.SetBool("IsDead", currentState == EnemyState.Dead);
@@ -63,20 +64,24 @@ public class SkeletonArcher : EnemyBase
             return;
         }
 
-        // Mantiene distancia de disparo
-        Vector2 dir = (player.position - transform.position);
-        Girar(dir.x);
-
+        //Si el jugador esta dentro del rango de ataque, pasa a atacar
         if (distanciaJugador <= radioAtaque * 1.2f)
-        { 
-            CambiarEstado(EnemyState.Attack); 
-        }
-            
-        else
         {
-            CambiarEstado(EnemyState.Chase);
+            CambiarEstado(EnemyState.Attack);
+            return;
         }
-           
+
+        //Si se aleja demasiado, vuelve a patrullar
+        if (distanciaJugador > radioDeteccion * 1.5f)
+        {
+            mirandoAlJugador = false;
+            CambiarEstado(EnemyState.Patrol);
+            return;
+        }
+
+        // Si sigue persiguiendo, mirar al jugador siempre
+        GirarHaciaJugador();
+
     }
 
     protected override void Atacar()
@@ -88,6 +93,9 @@ public class SkeletonArcher : EnemyBase
         canMove = false;
         rb.linearVelocity = Vector2.zero;
 
+        //Girar solo si esta por iniciar el ataque, no mientras anima
+        GirarHaciaJugador();
+
         if (Time.time >= proximoDisparo)
         {
             isAttacking = true;
@@ -96,7 +104,27 @@ public class SkeletonArcher : EnemyBase
         }
     }
 
-    // Evento de animación: dispara flecha
+    private void GirarHaciaJugador()
+    {
+        if (player == null) return;
+
+        bool jugadorALaDerecha = player.position.x > transform.position.x;
+
+        if (jugadorALaDerecha && !facingRight)
+        {
+            Girar();
+        }
+            
+        else if (!jugadorALaDerecha && facingRight)
+        {
+            Girar();
+        }
+            
+
+    }
+
+
+    //Disparo de Flecha
     public void DispararFlecha()
     {
         if (prefabFlecha == null || puntoDisparo == null || player == null)
@@ -123,6 +151,7 @@ public class SkeletonArcher : EnemyBase
         
     }
 
+    //Finaliza el ataque
     public void FinalizaAtaque()
     {
         isAttacking = false;
@@ -130,7 +159,21 @@ public class SkeletonArcher : EnemyBase
 
         if (!isStunned && !estaMuerto())
         {
-            CambiarEstado(EnemyState.Patrol);
+            if (distanciaJugador <= radioAtaque * 1.2f)
+            {
+                CambiarEstado(EnemyState.Attack);
+            }
+               
+            else if (distanciaJugador <= radioDeteccion)
+            {
+                CambiarEstado(EnemyState.Chase);
+            }
+                
+            else
+            {
+                CambiarEstado(EnemyState.Patrol);
+            }
+               
         }
             
     }
