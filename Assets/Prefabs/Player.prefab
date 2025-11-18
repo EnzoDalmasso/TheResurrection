@@ -633,8 +633,8 @@ MonoBehaviour:
   capaCaja:
     serializedVersion: 2
     m_Bits: 64
-  fuerzaEmpuje: 3.5
-  duracionEmpuje: 0.15
+  fuerzaEmpuje: 150
+  duracionEmpuje: 0.2
   capaParedes:
     serializedVersion: 2
     m_Bits: 512
@@ -677,7 +677,7 @@ AudioSource:
   m_GameObject: {fileID: 5872519334164168447}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -2377417771209624228, guid: fd693307eb1607d4c9746403cc571c33, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4234141642288379812}
   - component: {fileID: 4066713325283161083}
   - component: {fileID: 6759622279915775817}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: SkeletonArcher
   m_TagString: Enemigo
   m_Icon: {fileID: 0}
@@ -224,7 +224,7 @@ AudioSource:
   m_GameObject: {fileID: 4299631832160118174}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -2377417771209624228, guid: fd693307eb1607d4c9746403cc571c33, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -239,7 +239,7 @@ AudioSource:
   MinDistance: 2
   MaxDistance: 10
   Pan2D: 0
-  rolloffMode: 1
+  rolloffMode: 0
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -272,7 +272,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.2
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -321,7 +321,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3785917438870565496}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: ControladorDisparoArcher
   m_TagString: EnemyHeadArcher
   m_Icon: {fileID: 0}

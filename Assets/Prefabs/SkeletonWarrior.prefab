@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8563471414712783079}
   - component: {fileID: 7607146606313269966}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: "Da\xF1oespada"
   m_TagString: EspadaSkeleton
   m_Icon: {fileID: 0}
@@ -66,7 +66,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.34835586, y: 0}
+  m_Offset: {x: -0.4099088, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -76,7 +76,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.22355562, y: 0.5947375}
+  m_Size: {x: 0.3466615, y: 0.5947375}
   m_EdgeRadius: 0
 --- !u!1 &2533614922604048305
 GameObject:
@@ -87,7 +87,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1165670606461577707}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: ControladorAtaqueWarrior
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 1357313292522085192}
   - component: {fileID: 1448850491323529607}
   - component: {fileID: 807492099007454861}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: SkeletonWarrior
   m_TagString: Enemigo
   m_Icon: {fileID: 0}
@@ -335,7 +335,7 @@ AudioSource:
   m_GameObject: {fileID: 6872631891894353347}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -2377417771209624228, guid: fd693307eb1607d4c9746403cc571c33, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
@@ -350,7 +350,7 @@ AudioSource:
   MinDistance: 2
   MaxDistance: 10
   Pan2D: 0
-  rolloffMode: 1
+  rolloffMode: 0
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -383,7 +383,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.2
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

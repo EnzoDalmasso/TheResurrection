@@ -210,7 +210,7 @@ public class PlayerController1 : MonoBehaviour
     // FIXEDUPDATE — MOVIMIENTO FISICO
     void FixedUpdate()
     {
-        if (!puedeMoverse || !estaVivo || siendoEmpujado) return;
+        if (!puedeMoverse || !estaVivo) return;
 
         DetectarPared();
         
@@ -223,7 +223,7 @@ public class PlayerController1 : MonoBehaviour
         }
 
 
-        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputX = siendoEmpujado ? 0 : Input.GetAxisRaw("Horizontal");
         bool botonSalto = Input.GetButton("Jump");
 
         //SISTEMA DE SPRINT
@@ -320,7 +320,7 @@ public class PlayerController1 : MonoBehaviour
         //se bloquea si esta tocando una caja lateral y se mueve
         bool bloqueadoPorCaja = TocaCajaLateral() && (Mathf.Abs(rb.linearVelocity.x) > 0.04f || estaSprintando);
 
-        if (botonSalto && tiempoCoyote > 0f && !TocaTecho() && !bloqueadoPorCaja)
+        if (!siendoEmpujado && botonSalto && tiempoCoyote > 0f && !TocaTecho() && !bloqueadoPorCaja)
         {
             vel.y = fuerzaSalto;
             tiempoCoyote = 0f;
@@ -719,9 +719,10 @@ public class PlayerController1 : MonoBehaviour
         if (interrumpir)
             audioSource.Stop();
 
-        audioSource.PlayOneShot(clip, volumen);
-
+        audioSource.clip = clip;
+        audioSource.Play();
     }
+
     public void SetPuedeMoverse(bool valor)
     {
         puedeMoverse = valor;
