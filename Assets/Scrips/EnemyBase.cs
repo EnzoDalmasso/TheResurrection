@@ -379,6 +379,15 @@ private float tiempoUltimoGolpe = 0f;
         isAttacking = false;
         velocity.x = 0f;
 
+        //Apagar el collider de daño
+        Transform danio = transform.Find("DanioPlayer");
+        if (danio != null)
+        {
+            Collider2D colDanio = danio.GetComponent<Collider2D>();
+            if (colDanio != null)
+                colDanio.enabled = false;
+        }
+
         rb.gravityScale = 0f;
         rb.linearVelocity = Vector2.zero;
         rb.constraints = RigidbodyConstraints2D.FreezeAll;
