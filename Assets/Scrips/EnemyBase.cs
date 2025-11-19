@@ -58,7 +58,8 @@ public class EnemyBase : MonoBehaviour
     protected int direccionPatrulla = 1;
     protected float temporizadorCambioDireccion = 0f;
     [SerializeField] protected float tiempoCambioDireccion = 5f;
-
+    [SerializeField] private float tiempoEntreGolpes = 0.5f;
+private float tiempoUltimoGolpe = 0f;
 
     // START
     protected virtual void Start()
@@ -200,7 +201,28 @@ public class EnemyBase : MonoBehaviour
             temporizadorCambioDireccion = 0f;
         }
     }
+    protected virtual void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            // COOL DOWN: evita pegar 60 veces por segundo
+            if (Time.time < tiempoUltimoGolpe + tiempoEntreGolpes)
+                return;
 
+            tiempoUltimoGolpe = Time.time; // Resetea el cooldown
+
+            PlayerController1 player = collision.GetComponent<PlayerController1>();
+
+            if (player != null)
+            {
+                // Daño
+                player.RecibirDaño(10f);
+
+                // Empuje usando la POSICIÓN del enemigo
+                player.RecibirGolpe(transform.position);
+            }
+        }
+    }
     protected virtual void OnDestroy()
     {
         GameObject playerObj = GameObject.FindWithTag("Player");

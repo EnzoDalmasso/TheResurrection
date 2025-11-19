@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3169785604494569364}
   - component: {fileID: 7955755922651953576}
-  m_Layer: 7
+  m_Layer: 18
   m_Name: "Da\xF1olanza"
   m_TagString: LanzaSpearman
   m_Icon: {fileID: 0}
@@ -66,7 +66,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.03602025, y: 0}
+  m_Offset: {x: 0.063509375, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -76,7 +76,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.2720405, y: 0.5}
+  m_Size: {x: 0.21706223, y: 0.5}
   m_EdgeRadius: 0
 --- !u!1 &5377991285342355363
 GameObject:
@@ -115,6 +115,7 @@ Transform:
   m_Children:
   - {fileID: 7903716570267936937}
   - {fileID: 3169785604494569364}
+  - {fileID: 6636793084513996473}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &2126262825191299489
@@ -249,6 +250,7 @@ MonoBehaviour:
     m_Bits: 512
   duracionAturdimientoBase: 1
   tiempoCambioDireccion: 3
+  tiempoEntreGolpes: 0.5
   "da\xF1oLanza": {fileID: 3619769292700077595}
   tiempoEntreAtaques: 1
   velocidadCorrer: 1.6
@@ -423,3 +425,72 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6516526647372460557}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6337994165712452744
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6636793084513996473}
+  - component: {fileID: 6719197566193021434}
+  m_Layer: 0
+  m_Name: DanioPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6636793084513996473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6337994165712452744}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6516526647372460557}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!70 &6719197566193021434
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6337994165712452744}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -0.034942508, y: -0.28926665}
+  m_Size: {x: 0.109101415, y: 0.4214667}
+  m_Direction: 0
