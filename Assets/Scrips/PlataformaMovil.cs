@@ -44,7 +44,7 @@ public class PlataformaMovil : MonoBehaviour
             if(contacto.normal.y < -0.5f)
             {
                 collision.transform.SetParent(this.transform);
-                Debug.Log("Arriba");
+                
             }
             
         }

@@ -220,10 +220,7 @@ public class JuegoMenuManager : MonoBehaviour
     //REINICIAMOS NIVEL
     public void ReiniciarNivel()
     {
-        PlayerPrefs.DeleteKey("puntosIndex");
-        PlayerPrefs.DeleteKey("sessionStarted");
-        PlayerPrefs.Save();
-
+  
         Time.timeScale = 1f;
 
         if (ControladorSonido.instance != null)

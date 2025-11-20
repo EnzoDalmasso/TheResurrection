@@ -112,8 +112,7 @@ public class PlayerController1 : MonoBehaviour
     //START
     void Start()
     {
-
-
+       
         rb = GetComponent<Rigidbody2D>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
         animPlayer = GetComponent<Animator>();

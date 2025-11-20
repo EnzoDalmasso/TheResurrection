@@ -18,12 +18,12 @@ public class ControladorJuego : MonoBehaviour
 
     private int indexPuntosControl; //Ultimo checkpoint alcanzado
 
-  
+
 
     private void Awake()
     {
-        
-        
+
+
         Instance = this;
 
         //Cuando se inicia por primera vez arranca del Inicio
@@ -45,7 +45,7 @@ public class ControladorJuego : MonoBehaviour
         }
 
         //Instanciamos al jugador en ese punto
-        GameObject nuevoJugador = Instantiate(jugador,puntosDeControl[indexPuntosControl].transform.position,Quaternion.identity);
+        GameObject nuevoJugador = Instantiate(jugador, puntosDeControl[indexPuntosControl].transform.position, Quaternion.identity);
 
         //Asignamos el jugador al CinemachineVirtualCamera
         var cam = FindAnyObjectByType<CinemachineVirtualCamera>();
@@ -67,7 +67,7 @@ public class ControladorJuego : MonoBehaviour
     //Este metodo llama cada punto de control
     public void UltimoPuntoControl(GameObject puntoControl)
     {
-        
+
 
         for (int i = 0; i < puntosDeControl.Length; i++)
         {
