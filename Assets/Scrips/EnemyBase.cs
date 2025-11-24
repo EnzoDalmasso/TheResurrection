@@ -438,10 +438,10 @@ private float tiempoUltimoGolpe = 0f;
     {
 
         Vector2 centroCol = (Vector2)col.bounds.center;
-        Vector2 posRayoDebajo = new Vector2(centroCol.x + (col.bounds.extents.x * dirX),centroCol.y - col.bounds.extents.y);
+        Vector2 posRayoDebajo = new Vector2(centroCol.x + (col.bounds.extents.x * dirX), centroCol.y - col.bounds.extents.y);
 
         float distanciaRayoX = 0.05f;
-       
+
         RaycastHit2D rayoDebajo = Physics2D.Raycast(posRayoDebajo, Vector2.down, distanciaRayoX, Suelo);
         Debug.DrawRay(posRayoDebajo, Vector2.down * distanciaRayoX, Color.red);
 
@@ -453,7 +453,7 @@ private float tiempoUltimoGolpe = 0f;
 
 
         //Raycast hacia adelante (para detectar paredes)
-        Vector2 posRayoFrente = new Vector2(centroCol.x + (col.bounds.extents.x * dirX),centroCol.y);
+        Vector2 posRayoFrente = new Vector2(centroCol.x + (col.bounds.extents.x * dirX), centroCol.y-0.1f);
 
         float distanciaRayoFrente = 0.05f;
         RaycastHit2D rayoFrente = Physics2D.Raycast(posRayoFrente, Vector2.right * dirX, distanciaRayoFrente, Pared);
