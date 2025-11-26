@@ -281902,21 +281902,21 @@ MonoBehaviour:
   m_LookaheadTime: 0.3
   m_LookaheadSmoothing: 20
   m_LookaheadIgnoreY: 0
-  m_XDamping: 2
-  m_YDamping: 2
-  m_ZDamping: 1
+  m_XDamping: 1
+  m_YDamping: 1
+  m_ZDamping: 0
   m_TargetMovementOnly: 1
-  m_ScreenX: 0.48
-  m_ScreenY: 0.49
+  m_ScreenX: 0.45
+  m_ScreenY: 0.59
   m_CameraDistance: 10
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
   m_DeadZoneDepth: 0
   m_UnlimitedSoftZone: 0
-  m_SoftZoneWidth: 0.05
-  m_SoftZoneHeight: 0.33
+  m_SoftZoneWidth: 0.42
+  m_SoftZoneHeight: 0.39
   m_BiasX: 0
-  m_BiasY: 0
+  m_BiasY: 0.237
   m_CenterOnActivate: 1
   m_GroupFramingMode: 2
   m_AdjustmentMode: 0

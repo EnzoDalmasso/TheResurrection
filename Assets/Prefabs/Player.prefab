@@ -625,7 +625,7 @@ MonoBehaviour:
   velocidadWalk: 0.8
   sprintSpeed: 1.6
   fuerzaSalto: 4.2
-  tiempoSprintMaximo: 2
+  tiempoSprintMaximo: 2.6
   sensoresCaja:
   - {fileID: 6508620462117475188}
   - {fileID: 2640385371712430587}

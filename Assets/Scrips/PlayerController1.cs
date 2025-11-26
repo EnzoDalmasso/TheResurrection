@@ -47,7 +47,7 @@ public class PlayerController1 : MonoBehaviour
 
     [Header("Deteccion Paredes")]
     [SerializeField] private LayerMask capaParedes;
-    [SerializeField] private float distanciaDeteccionPared = 0.2f;
+    [SerializeField] private float distanciaDeteccionPared = 0.03f;
     private bool tocandoPared = false;
     [SerializeField] private Transform sensorPared;
 
@@ -298,8 +298,11 @@ public class PlayerController1 : MonoBehaviour
         }
         else
         {
-            // Si no hay input, desaceleramos suavemente en lugar de cortar a 0
-            vel.x = Mathf.Lerp(vel.x, 0, 5f * Time.fixedDeltaTime);
+            if (enSuelo)
+            {
+                //Solo frenamos cuando esta en el suelo
+                vel.x = Mathf.Lerp(vel.x, 0, 8f * Time.fixedDeltaTime);
+            }
         }
 
         //SALTO PERSONAJE
